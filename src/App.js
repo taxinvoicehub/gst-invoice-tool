@@ -120,6 +120,138 @@ export default function App() {
     statCard: (color) => ({ background: `${color}0F`, border: `1px solid ${color}25`, borderRadius: 14, padding: "16px 20px" }),
   };
 
+  // ── PRINT COMPONENT (regular function, not JSX component, to avoid focus bugs) ──
+  const renderInvoicePrint = (inv) => {
+    const { meta, client, items, biz, grandTotal, subtotal, totalGST, isIGST, computed } = inv;
+    const ps = { background: "#fff", color: "#111", borderRadius: 12, overflow: "hidden", boxShadow: "0 20px 60px #00000044", fontFamily: "Arial, sans-serif", fontSize: 12 };
+    return (
+      <div ref={printRef} style={ps}>
+        <style>{`@media print { body { margin: 0; } }`}</style>
+        {/* Header */}
+        <div style={{ background: "linear-gradient(135deg, #1E3A5F, #1D4ED8)", padding: "24px 28px", color: "#fff" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
+            <div>
+              <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 4 }}>{biz.name || "Your Business Name"}</div>
+              <div style={{ fontSize: 12, opacity: 0.8 }}>{biz.address}{biz.city ? ", " + biz.city : ""}</div>
+              <div style={{ fontSize: 12, opacity: 0.8 }}>{biz.state}{biz.pin ? " - " + biz.pin : ""}</div>
+              {biz.phone && <div style={{ fontSize: 12, opacity: 0.8 }}>📞 {biz.phone}</div>}
+              {biz.gstin && <div style={{ fontSize: 12, marginTop: 6, background: "#ffffff22", padding: "3px 10px", borderRadius: 99, display: "inline-block" }}>GSTIN: {biz.gstin}</div>}
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 2 }}>INVOICE</div>
+              <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>#{meta.invoiceNo}</div>
+              <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>Date: {meta.date}</div>
+              {meta.dueDate && <div style={{ fontSize: 12, opacity: 0.7 }}>Due: {meta.dueDate}</div>}
+            </div>
+          </div>
+        </div>
+
+        {/* Bill To */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, borderBottom: "1px solid #E5E7EB" }}>
+          <div style={{ padding: "16px 24px", borderRight: "1px solid #E5E7EB" }}>
+            <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 8, fontWeight: 700 }}>BILL TO</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>{client.name || "—"}</div>
+            {client.gstin && <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>GSTIN: {client.gstin}</div>}
+            {client.address && <div style={{ fontSize: 11, color: "#374151", marginTop: 4 }}>{client.address}</div>}
+            {client.city && <div style={{ fontSize: 11, color: "#374151" }}>{client.city}, {client.state} {client.pin}</div>}
+            {client.phone && <div style={{ fontSize: 11, color: "#374151", marginTop: 2 }}>📞 {client.phone}</div>}
+          </div>
+          <div style={{ padding: "16px 24px" }}>
+            <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 8, fontWeight: 700 }}>INVOICE INFO</div>
+            {[
+              ["Invoice No", meta.invoiceNo],
+              ["Invoice Date", meta.date],
+              ["Due Date", meta.dueDate || "—"],
+              ["Place of Supply", meta.placeOfSupply],
+              ["GST Type", isIGST ? "IGST (Inter-state)" : "CGST + SGST (Intra-state)"],
+            ].map(([k, v]) => (
+              <div key={k} style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ color: "#6B7280", fontSize: 11 }}>{k}:</span>
+                <span style={{ fontWeight: 600, fontSize: 11 }}>{v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Items Table */}
+        <div style={{ padding: "0 0 0 0" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "#F1F5F9" }}>
+                {["#", "Description", "HSN", "Qty", "Unit", "Rate", "GST%", "GST Amt", "Total"].map(h => (
+                  <th key={h} style={{ padding: "10px 12px", textAlign: h === "#" ? "center" : h === "Total" || h === "GST Amt" || h === "Rate" ? "right" : "left", fontSize: 10, color: "#6B7280", fontWeight: 700, letterSpacing: 1, borderBottom: "2px solid #E5E7EB" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item, i) => {
+                const c = computed ? computed[i] : calcItem(item);
+                return (
+                  <tr key={item.id} style={{ borderBottom: "1px solid #F3F4F6", background: i % 2 === 0 ? "#fff" : "#FAFAFA" }}>
+                    <td style={{ padding: "10px 12px", textAlign: "center", color: "#9CA3AF", fontSize: 11 }}>{i + 1}</td>
+                    <td style={{ padding: "10px 12px", fontWeight: 600, color: "#111" }}>{item.desc}</td>
+                    <td style={{ padding: "10px 12px", color: "#6B7280", fontSize: 11 }}>{item.hsn || "—"}</td>
+                    <td style={{ padding: "10px 12px", textAlign: "center" }}>{item.qty}</td>
+                    <td style={{ padding: "10px 12px", color: "#6B7280", fontSize: 11 }}>{item.unit}</td>
+                    <td style={{ padding: "10px 12px", textAlign: "right" }}>₹{fmt(item.rate)}</td>
+                    <td style={{ padding: "10px 12px", textAlign: "center", color: "#6B7280" }}>{item.gst}%</td>
+                    <td style={{ padding: "10px 12px", textAlign: "right", color: "#6B7280" }}>₹{fmt(c.gstAmt)}</td>
+                    <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#1D4ED8" }}>₹{fmt(c.total)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Totals */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "2px solid #E5E7EB" }}>
+          <div style={{ padding: "16px 24px" }}>
+            {biz.bank && (
+              <div>
+                <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 8, fontWeight: 700 }}>BANK DETAILS</div>
+                <div style={{ fontSize: 11, color: "#374151" }}>Bank: {biz.bank}</div>
+                <div style={{ fontSize: 11, color: "#374151" }}>A/C: {biz.account}</div>
+                <div style={{ fontSize: 11, color: "#374151" }}>IFSC: {biz.ifsc}</div>
+              </div>
+            )}
+            {meta.notes && (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 4, fontWeight: 700 }}>NOTES</div>
+                <div style={{ fontSize: 11, color: "#374151" }}>{meta.notes}</div>
+              </div>
+            )}
+          </div>
+          <div style={{ padding: "16px 24px", background: "#F8FAFC" }}>
+            {[
+              ["Subtotal", "₹" + fmt(subtotal)],
+              ...(isIGST
+                ? [["IGST", "₹" + fmt(totalGST)]]
+                : [["CGST", "₹" + fmt(totalGST/2)], ["SGST", "₹" + fmt(totalGST/2)]]
+              ),
+            ].map(([k, v]) => (
+              <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #E5E7EB", fontSize: 12 }}>
+                <span style={{ color: "#6B7280" }}>{k}</span>
+                <span style={{ fontWeight: 600 }}>{v}</span>
+              </div>
+            ))}
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0 4px", marginTop: 4 }}>
+              <span style={{ fontSize: 14, fontWeight: 800 }}>TOTAL</span>
+              <span style={{ fontSize: 20, fontWeight: 900, color: "#1D4ED8" }}>₹{fmt(grandTotal)}</span>
+            </div>
+            <div style={{ fontSize: 10, color: "#9CA3AF", fontStyle: "italic", marginTop: 4 }}>{toWords(Math.round(grandTotal))}</div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{ background: "#1E3A5F", padding: "12px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+          <div style={{ color: "#93C5FD", fontSize: 11 }}>{meta.terms}</div>
+          <div style={{ color: "#93C5FD", fontSize: 10, opacity: 0.7 }}>Generated by GST Invoice Tool</div>
+        </div>
+      </div>
+    );
+  };
+
   // ── DASHBOARD ────────────────────────────────────────────
   const dashboardView = (() => {
     const thisMonth = invoices.filter(i => i.meta.date.startsWith(new Date().toISOString().slice(0,7)));
@@ -473,137 +605,6 @@ export default function App() {
     </div>
   );
 
-  // ── PRINT COMPONENT (regular function, not JSX component, to avoid focus bugs) ──
-  const renderInvoicePrint = (inv) => {
-    const { meta, client, items, biz, grandTotal, subtotal, totalGST, isIGST, computed } = inv;
-    const ps = { background: "#fff", color: "#111", borderRadius: 12, overflow: "hidden", boxShadow: "0 20px 60px #00000044", fontFamily: "Arial, sans-serif", fontSize: 12 };
-    return (
-      <div ref={printRef} style={ps}>
-        <style>{`@media print { body { margin: 0; } }`}</style>
-        {/* Header */}
-        <div style={{ background: "linear-gradient(135deg, #1E3A5F, #1D4ED8)", padding: "24px 28px", color: "#fff" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
-            <div>
-              <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 4 }}>{biz.name || "Your Business Name"}</div>
-              <div style={{ fontSize: 12, opacity: 0.8 }}>{biz.address}{biz.city ? ", " + biz.city : ""}</div>
-              <div style={{ fontSize: 12, opacity: 0.8 }}>{biz.state}{biz.pin ? " - " + biz.pin : ""}</div>
-              {biz.phone && <div style={{ fontSize: 12, opacity: 0.8 }}>📞 {biz.phone}</div>}
-              {biz.gstin && <div style={{ fontSize: 12, marginTop: 6, background: "#ffffff22", padding: "3px 10px", borderRadius: 99, display: "inline-block" }}>GSTIN: {biz.gstin}</div>}
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 2 }}>INVOICE</div>
-              <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>#{meta.invoiceNo}</div>
-              <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>Date: {meta.date}</div>
-              {meta.dueDate && <div style={{ fontSize: 12, opacity: 0.7 }}>Due: {meta.dueDate}</div>}
-            </div>
-          </div>
-        </div>
-
-        {/* Bill To */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, borderBottom: "1px solid #E5E7EB" }}>
-          <div style={{ padding: "16px 24px", borderRight: "1px solid #E5E7EB" }}>
-            <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 8, fontWeight: 700 }}>BILL TO</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>{client.name || "—"}</div>
-            {client.gstin && <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>GSTIN: {client.gstin}</div>}
-            {client.address && <div style={{ fontSize: 11, color: "#374151", marginTop: 4 }}>{client.address}</div>}
-            {client.city && <div style={{ fontSize: 11, color: "#374151" }}>{client.city}, {client.state} {client.pin}</div>}
-            {client.phone && <div style={{ fontSize: 11, color: "#374151", marginTop: 2 }}>📞 {client.phone}</div>}
-          </div>
-          <div style={{ padding: "16px 24px" }}>
-            <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 8, fontWeight: 700 }}>INVOICE INFO</div>
-            {[
-              ["Invoice No", meta.invoiceNo],
-              ["Invoice Date", meta.date],
-              ["Due Date", meta.dueDate || "—"],
-              ["Place of Supply", meta.placeOfSupply],
-              ["GST Type", isIGST ? "IGST (Inter-state)" : "CGST + SGST (Intra-state)"],
-            ].map(([k, v]) => (
-              <div key={k} style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                <span style={{ color: "#6B7280", fontSize: 11 }}>{k}:</span>
-                <span style={{ fontWeight: 600, fontSize: 11 }}>{v}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Items Table */}
-        <div style={{ padding: "0 0 0 0" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ background: "#F1F5F9" }}>
-                {["#", "Description", "HSN", "Qty", "Unit", "Rate", "GST%", "GST Amt", "Total"].map(h => (
-                  <th key={h} style={{ padding: "10px 12px", textAlign: h === "#" ? "center" : h === "Total" || h === "GST Amt" || h === "Rate" ? "right" : "left", fontSize: 10, color: "#6B7280", fontWeight: 700, letterSpacing: 1, borderBottom: "2px solid #E5E7EB" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, i) => {
-                const c = computed ? computed[i] : calcItem(item);
-                return (
-                  <tr key={item.id} style={{ borderBottom: "1px solid #F3F4F6", background: i % 2 === 0 ? "#fff" : "#FAFAFA" }}>
-                    <td style={{ padding: "10px 12px", textAlign: "center", color: "#9CA3AF", fontSize: 11 }}>{i + 1}</td>
-                    <td style={{ padding: "10px 12px", fontWeight: 600, color: "#111" }}>{item.desc}</td>
-                    <td style={{ padding: "10px 12px", color: "#6B7280", fontSize: 11 }}>{item.hsn || "—"}</td>
-                    <td style={{ padding: "10px 12px", textAlign: "center" }}>{item.qty}</td>
-                    <td style={{ padding: "10px 12px", color: "#6B7280", fontSize: 11 }}>{item.unit}</td>
-                    <td style={{ padding: "10px 12px", textAlign: "right" }}>₹{fmt(item.rate)}</td>
-                    <td style={{ padding: "10px 12px", textAlign: "center", color: "#6B7280" }}>{item.gst}%</td>
-                    <td style={{ padding: "10px 12px", textAlign: "right", color: "#6B7280" }}>₹{fmt(c.gstAmt)}</td>
-                    <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#1D4ED8" }}>₹{fmt(c.total)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Totals */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "2px solid #E5E7EB" }}>
-          <div style={{ padding: "16px 24px" }}>
-            {biz.bank && (
-              <div>
-                <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 8, fontWeight: 700 }}>BANK DETAILS</div>
-                <div style={{ fontSize: 11, color: "#374151" }}>Bank: {biz.bank}</div>
-                <div style={{ fontSize: 11, color: "#374151" }}>A/C: {biz.account}</div>
-                <div style={{ fontSize: 11, color: "#374151" }}>IFSC: {biz.ifsc}</div>
-              </div>
-            )}
-            {meta.notes && (
-              <div style={{ marginTop: 12 }}>
-                <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 4, fontWeight: 700 }}>NOTES</div>
-                <div style={{ fontSize: 11, color: "#374151" }}>{meta.notes}</div>
-              </div>
-            )}
-          </div>
-          <div style={{ padding: "16px 24px", background: "#F8FAFC" }}>
-            {[
-              ["Subtotal", "₹" + fmt(subtotal)],
-              ...(isIGST
-                ? [["IGST", "₹" + fmt(totalGST)]]
-                : [["CGST", "₹" + fmt(totalGST/2)], ["SGST", "₹" + fmt(totalGST/2)]]
-              ),
-            ].map(([k, v]) => (
-              <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #E5E7EB", fontSize: 12 }}>
-                <span style={{ color: "#6B7280" }}>{k}</span>
-                <span style={{ fontWeight: 600 }}>{v}</span>
-              </div>
-            ))}
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0 4px", marginTop: 4 }}>
-              <span style={{ fontSize: 14, fontWeight: 800 }}>TOTAL</span>
-              <span style={{ fontSize: 20, fontWeight: 900, color: "#1D4ED8" }}>₹{fmt(grandTotal)}</span>
-            </div>
-            <div style={{ fontSize: 10, color: "#9CA3AF", fontStyle: "italic", marginTop: 4 }}>{toWords(Math.round(grandTotal))}</div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div style={{ background: "#1E3A5F", padding: "12px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-          <div style={{ color: "#93C5FD", fontSize: 11 }}>{meta.terms}</div>
-          <div style={{ color: "#93C5FD", fontSize: 10, opacity: 0.7 }}>Generated by GST Invoice Tool</div>
-        </div>
-      </div>
-    );
-  };
 
   // ── PREVIEW SCREEN ────────────────────────────────────────
   const previewScreenView = (() => {
