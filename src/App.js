@@ -1,4 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { ref, onValue, set } from "firebase/database";
+import { db } from "./firebase";
 
 // ── helpers ──────────────────────────────────────────────
 const GST_RATES = [0, 5, 12, 18, 28];
@@ -50,6 +52,29 @@ export default function App() {
   const [showPreview, setShowPreview] = useState(false);
   const printRef = useRef();
 
+  // ── load data from Firebase on app start ─────────────────
+  useEffect(() => {
+    const bizRef = ref(db, "business");
+    onValue(bizRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setBiz(data);
+        setBizSaved(true);
+      }
+    });
+
+    const invRef = ref(db, "invoices");
+    onValue(invRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const list = Object.values(data).sort((a, b) => b.id - a.id);
+        setInvoices(list);
+      } else {
+        setInvoices([]);
+      }
+    });
+  }, []);
+
   // ── compute totals ──────────────────────────────────────
   const computed = items.map(calcItem);
   const subtotal = computed.reduce((s, c) => s + c.base, 0);
@@ -65,7 +90,7 @@ export default function App() {
   // ── save invoice ────────────────────────────────────────
   const saveInvoice = () => {
     const inv = { id: Date.now(), meta: { ...meta }, client: { ...client }, items: [...items], biz: { ...biz }, grandTotal, subtotal, totalGST, isIGST };
-    setInvoices(p => [inv, ...p]);
+    set(ref(db, "invoices/" + inv.id), inv);
     setMeta(m => ({ ...m, invoiceNo: "INV-" + String(parseInt(m.invoiceNo.replace(/\D/g,"") || 0) + 1).padStart(3,"0"), date: today() }));
     setClient(initClient);
     setItems([newItem()]);
@@ -442,7 +467,7 @@ export default function App() {
         </div>
       </div>
 
-      <button style={{ ...S.btn("#10B981"), width: "100%", padding: 14, fontSize: 14 }} onClick={() => { if (!biz.name || !biz.gstin) { alert("Business naam aur GSTIN zaroori hai!"); return; } setBizSaved(true); setScreen("Dashboard"); alert("✅ Business details save ho gayi!"); }}>
+      <button style={{ ...S.btn("#10B981"), width: "100%", padding: 14, fontSize: 14 }} onClick={() => { if (!biz.name || !biz.gstin) { alert("Business naam aur GSTIN zaroori hai!"); return; } set(ref(db, "business"), biz); setBizSaved(true); setScreen("Dashboard"); alert("✅ Business details save ho gayi!"); }}>
         💾 Save Business Details
       </button>
     </div>
