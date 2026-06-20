@@ -121,7 +121,7 @@ export default function App() {
   };
 
   // ── DASHBOARD ────────────────────────────────────────────
-  const Dashboard = () => {
+  const dashboardView = (() => {
     const thisMonth = invoices.filter(i => i.meta.date.startsWith(new Date().toISOString().slice(0,7)));
     const revenue = invoices.reduce((s,i) => s + i.grandTotal, 0);
     const monthRev = thisMonth.reduce((s,i) => s + i.grandTotal, 0);
@@ -186,10 +186,10 @@ export default function App() {
         )}
       </div>
     );
-  };
+  })();
 
   // ── NEW INVOICE ───────────────────────────────────────────
-  const NewInvoice = () => (
+  const newInvoiceView = (
     <div>
       <p style={{ ...S.sectionTitle, fontSize: 13, marginBottom: 16 }}>📄 CREATE NEW GST INVOICE</p>
 
@@ -362,7 +362,7 @@ export default function App() {
               <button style={{ ...S.btn("#10B981") }} onClick={() => { saveInvoice(); setShowPreview(false); }}>💾 Save Invoice</button>
               <button style={S.btnOutline} onClick={() => setShowPreview(false)}>✕ Close</button>
             </div>
-            <InvoicePrint inv={{ meta, client, items, biz, grandTotal, subtotal, totalGST, isIGST, computed }} />
+            {renderInvoicePrint({ meta, client, items, biz, grandTotal, subtotal, totalGST, isIGST, computed })}
           </div>
         </div>
       )}
@@ -370,7 +370,7 @@ export default function App() {
   );
 
   // ── INVOICE LIST ──────────────────────────────────────────
-  const InvoiceList = () => (
+  const invoiceListView = (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <p style={{ ...S.sectionTitle, margin: 0 }}>📋 ALL INVOICES ({invoices.length})</p>
@@ -402,7 +402,7 @@ export default function App() {
   );
 
   // ── SETTINGS ──────────────────────────────────────────────
-  const Settings = () => (
+  const settingsView = (
     <div>
       <p style={{ ...S.sectionTitle, fontSize: 13, marginBottom: 16 }}>⚙️ BUSINESS SETUP</p>
       <div style={S.card}>
@@ -473,23 +473,8 @@ export default function App() {
     </div>
   );
 
-  // ── PREVIEW SCREEN ────────────────────────────────────────
-  const PreviewScreen = () => {
-    if (!previewInv) return null;
-    const inv = { ...previewInv, computed: previewInv.items.map(calcItem) };
-    return (
-      <div>
-        <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
-          <button style={S.btn()} onClick={handlePrint}>🖨️ Print / PDF</button>
-          <button style={S.btnOutline} onClick={() => setScreen("My Invoices")}>← Back</button>
-        </div>
-        <InvoicePrint inv={inv} />
-      </div>
-    );
-  };
-
-  // ── PRINT COMPONENT ───────────────────────────────────────
-  const InvoicePrint = ({ inv }) => {
+  // ── PRINT COMPONENT (regular function, not JSX component, to avoid focus bugs) ──
+  const renderInvoicePrint = (inv) => {
     const { meta, client, items, biz, grandTotal, subtotal, totalGST, isIGST, computed } = inv;
     const ps = { background: "#fff", color: "#111", borderRadius: 12, overflow: "hidden", boxShadow: "0 20px 60px #00000044", fontFamily: "Arial, sans-serif", fontSize: 12 };
     return (
@@ -620,6 +605,21 @@ export default function App() {
     );
   };
 
+  // ── PREVIEW SCREEN ────────────────────────────────────────
+  const previewScreenView = (() => {
+    if (!previewInv) return null;
+    const inv = { ...previewInv, computed: previewInv.items.map(calcItem) };
+    return (
+      <div>
+        <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+          <button style={S.btn()} onClick={handlePrint}>🖨️ Print / PDF</button>
+          <button style={S.btnOutline} onClick={() => setScreen("My Invoices")}>← Back</button>
+        </div>
+        {renderInvoicePrint(inv)}
+      </div>
+    );
+  })();
+
   // ── RENDER ────────────────────────────────────────────────
   return (
     <div style={S.app}>
@@ -656,11 +656,11 @@ export default function App() {
 
       {/* Body */}
       <div style={S.body}>
-        {screen === "Dashboard" && <Dashboard />}
-        {screen === "New Invoice" && <NewInvoice />}
-        {screen === "My Invoices" && <InvoiceList />}
-        {screen === "Settings" && <Settings />}
-        {screen === "preview" && <PreviewScreen />}
+        {screen === "Dashboard" && dashboardView}
+        {screen === "New Invoice" && newInvoiceView}
+        {screen === "My Invoices" && invoiceListView}
+        {screen === "Settings" && settingsView}
+        {screen === "preview" && previewScreenView}
       </div>
     </div>
   );
