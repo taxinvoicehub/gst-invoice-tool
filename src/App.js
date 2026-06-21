@@ -101,23 +101,23 @@ export default function App() {
 
   // ── styles ───────────────────────────────────────────────
   const S = {
-    app: { minHeight: "100vh", background: "#0B0F1A", color: "#E2E8F0", fontFamily: "'Sora', 'DM Sans', sans-serif", paddingBottom: 80 },
-    header: { background: "linear-gradient(135deg, #0F1629 0%, #0B0F1A 100%)", borderBottom: "1px solid #1E2D45", padding: "18px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100 },
+    app: { minHeight: "100vh", background: "#F1F5F9", color: "#1E293B", fontFamily: "'Inter', 'Segoe UI', sans-serif", paddingBottom: 80 },
+    header: { background: "#0F172A", borderBottom: "1px solid #1E293B", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 4px rgba(0,0,0,0.15)" },
     logo: { display: "flex", alignItems: "center", gap: 10 },
-    logoBox: { width: 36, height: 36, borderRadius: 10, background: "linear-gradient(135deg, #3B82F6, #1D4ED8)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 900, color: "#fff", boxShadow: "0 0 16px #3B82F644" },
-    logoText: { fontSize: 18, fontWeight: 800, background: "linear-gradient(135deg, #93C5FD, #3B82F6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" },
-    nav: { display: "flex", gap: 4, background: "#111827", borderRadius: 12, padding: 4, border: "1px solid #1E2D45", overflowX: "auto" },
-    navBtn: (active) => ({ padding: "7px 14px", borderRadius: 9, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap", background: active ? "linear-gradient(135deg, #3B82F6, #1D4ED8)" : "transparent", color: active ? "#fff" : "#64748B", boxShadow: active ? "0 4px 12px #3B82F644" : "none", fontFamily: "inherit" }),
+    logoBox: { width: 36, height: 36, borderRadius: 8, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color: "#fff" },
+    logoText: { fontSize: 17, fontWeight: 700, color: "#fff" },
+    nav: { display: "flex", gap: 4, background: "#1E293B", borderRadius: 10, padding: 4, border: "none", overflowX: "auto" },
+    navBtn: (active) => ({ padding: "7px 14px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap", background: active ? "#2563EB" : "transparent", color: active ? "#fff" : "#94A3B8", boxShadow: "none", fontFamily: "inherit" }),
     body: { maxWidth: 760, margin: "0 auto", padding: "20px 16px" },
-    card: { background: "#111827", border: "1px solid #1E2D45", borderRadius: 16, padding: 20, marginBottom: 14 },
-    label: { fontSize: 11, color: "#64748B", fontFamily: "monospace", letterSpacing: 1.5, marginBottom: 6, display: "block" },
-    input: { width: "100%", background: "#0B0F1A", border: "1px solid #1E2D45", borderRadius: 10, padding: "10px 14px", color: "#E2E8F0", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box", transition: "border-color 0.2s" },
-    select: { width: "100%", background: "#0B0F1A", border: "1px solid #1E2D45", borderRadius: 10, padding: "10px 14px", color: "#E2E8F0", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" },
-    btn: (color="#3B82F6") => ({ background: `linear-gradient(135deg, ${color}, ${color}CC)`, border: "none", borderRadius: 10, padding: "10px 20px", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s", boxShadow: `0 4px 12px ${color}44` }),
-    btnOutline: { background: "transparent", border: "1px solid #1E2D45", borderRadius: 10, padding: "10px 20px", color: "#94A3B8", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" },
-    sectionTitle: { fontSize: 11, color: "#3B82F6", fontFamily: "monospace", letterSpacing: 2, marginBottom: 14 },
+    card: { background: "#fff", border: "1px solid #E2E8F0", borderRadius: 12, padding: 20, marginBottom: 14, boxShadow: "0 1px 2px rgba(15,23,42,0.04)" },
+    label: { fontSize: 11, color: "#64748B", fontFamily: "inherit", letterSpacing: 0.5, marginBottom: 6, display: "block", fontWeight: 600, textTransform: "uppercase" },
+    input: { width: "100%", background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, padding: "10px 14px", color: "#1E293B", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box", transition: "border-color 0.2s" },
+    select: { width: "100%", background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 8, padding: "10px 14px", color: "#1E293B", fontSize: 13, outline: "none", fontFamily: "inherit", boxSizing: "border-box" },
+    btn: (color="#2563EB") => ({ background: color, border: "none", borderRadius: 8, padding: "10px 20px", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s", boxShadow: "0 1px 2px rgba(15,23,42,0.12)" }),
+    btnOutline: { background: "#fff", border: "1px solid #CBD5E1", borderRadius: 8, padding: "10px 20px", color: "#475569", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" },
+    sectionTitle: { fontSize: 11, color: "#2563EB", fontFamily: "inherit", letterSpacing: 1, marginBottom: 14, fontWeight: 700, textTransform: "uppercase" },
     grid2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
-    statCard: (color) => ({ background: `${color}0F`, border: `1px solid ${color}25`, borderRadius: 14, padding: "16px 20px" }),
+    statCard: (color) => ({ background: `${color}0D`, border: `1px solid ${color}26`, borderLeft: `3px solid ${color}`, borderRadius: 10, padding: "16px 18px" }),
   };
 
   // ── PRINT COMPONENT (regular function, not JSX component, to avoid focus bugs) ──
@@ -125,7 +125,7 @@ export default function App() {
     const { meta, client, items, biz, grandTotal, subtotal, totalGST, isIGST, computed } = inv;
     const ps = { background: "#fff", color: "#111", borderRadius: 12, overflow: "hidden", boxShadow: "0 20px 60px #00000044", fontFamily: "Arial, sans-serif", fontSize: 12 };
     return (
-      <div ref={printRef} style={ps}>
+      <div ref={printRef} id="print-area" style={ps}>
         <style>{`@media print { body { margin: 0; } }`}</style>
         {/* Header */}
         <div style={{ background: "linear-gradient(135deg, #1E3A5F, #1D4ED8)", padding: "24px 28px", color: "#fff" }}>
@@ -174,7 +174,8 @@ export default function App() {
         </div>
 
         {/* Items Table */}
-        <div style={{ padding: "0 0 0 0" }}>
+        <div className="scroll-hint">↔ Swipe to see full table</div>
+        <div className="invoice-table-wrap">
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#F1F5F9" }}>
@@ -260,58 +261,58 @@ export default function App() {
     return (
       <div>
         <div style={{ marginBottom: 20 }}>
-          <p style={{ fontSize: 11, color: "#3B82F6", fontFamily: "monospace", letterSpacing: 2, margin: "0 0 6px" }}>WELCOME BACK</p>
-          <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, background: "linear-gradient(135deg, #fff, #94A3B8)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <p style={{ fontSize: 11, color: "#2563EB", fontFamily: "inherit", letterSpacing: 1, margin: "0 0 6px", fontWeight: 700, textTransform: "uppercase" }}>Welcome Back</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, color: "#0F172A" }}>
             {biz.name || "Setup your business"} 👋
           </h1>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
           {[
-            { label: "TOTAL INVOICES", value: invoices.length, color: "#3B82F6", icon: "🧾" },
-            { label: "THIS MONTH", value: thisMonth.length, color: "#10B981", icon: "📅" },
-            { label: "TOTAL REVENUE", value: "₹" + fmt(revenue), color: "#F59E0B", icon: "💰" },
-            { label: "MONTH REVENUE", value: "₹" + fmt(monthRev), color: "#A78BFA", icon: "📈" },
+            { label: "TOTAL INVOICES", value: invoices.length, color: "#2563EB", icon: "🧾" },
+            { label: "THIS MONTH", value: thisMonth.length, color: "#059669", icon: "📅" },
+            { label: "TOTAL REVENUE", value: "₹" + fmt(revenue), color: "#D97706", icon: "💰" },
+            { label: "MONTH REVENUE", value: "₹" + fmt(monthRev), color: "#7C3AED", icon: "📈" },
           ].map((s, i) => (
             <div key={i} style={S.statCard(s.color)}>
               <div style={{ fontSize: 20, marginBottom: 6 }}>{s.icon}</div>
-              <div style={{ fontSize: 11, color: "#64748B", fontFamily: "monospace", letterSpacing: 1, marginBottom: 4 }}>{s.label}</div>
+              <div style={{ fontSize: 10, color: "#64748B", fontFamily: "inherit", letterSpacing: 0.5, marginBottom: 4, fontWeight: 600, textTransform: "uppercase" }}>{s.label}</div>
               <div style={{ fontSize: 18, fontWeight: 800, color: s.color }}>{s.value}</div>
             </div>
           ))}
         </div>
 
         <div style={S.card}>
-          <p style={S.sectionTitle}>⚡ QUICK ACTIONS</p>
+          <p style={S.sectionTitle}>⚡ Quick Actions</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <button style={{ ...S.btn(), width: "100%", padding: "14px 20px", fontSize: 14 }} onClick={() => setScreen("New Invoice")}>
               ➕ New GST Invoice
             </button>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-              <button style={{ ...S.btnOutline, borderRadius: 10 }} onClick={() => setScreen("My Invoices")}>📋 View Invoices</button>
-              <button style={{ ...S.btnOutline, borderRadius: 10 }} onClick={() => setScreen("Settings")}>⚙️ Business Setup</button>
+              <button style={{ ...S.btnOutline, borderRadius: 8 }} onClick={() => setScreen("My Invoices")}>📋 View Invoices</button>
+              <button style={{ ...S.btnOutline, borderRadius: 8 }} onClick={() => setScreen("Settings")}>⚙️ Business Setup</button>
             </div>
           </div>
         </div>
 
         {!bizSaved && (
-          <div style={{ background: "#F59E0B0F", border: "1px solid #F59E0B33", borderRadius: 14, padding: 16 }}>
-            <p style={{ fontSize: 13, color: "#F59E0B", fontWeight: 600, margin: "0 0 6px" }}>⚠️ Business Details Missing!</p>
-            <p style={{ fontSize: 12, color: "#94A3B8", margin: "0 0 10px" }}>Invoice pe aapka naam aur GST number nahi dikhega. Pehle Setup karo!</p>
-            <button style={S.btn("#F59E0B")} onClick={() => setScreen("Settings")}>Setup Now →</button>
+          <div style={{ background: "#FFFBEB", border: "1px solid #FDE68A", borderRadius: 10, padding: 16 }}>
+            <p style={{ fontSize: 13, color: "#B45309", fontWeight: 700, margin: "0 0 6px" }}>⚠️ Business Details Missing!</p>
+            <p style={{ fontSize: 12, color: "#92400E", margin: "0 0 10px" }}>Invoice pe aapka naam aur GST number nahi dikhega. Pehle Setup karo!</p>
+            <button style={S.btn("#D97706")} onClick={() => setScreen("Settings")}>Setup Now →</button>
           </div>
         )}
 
         {invoices.length > 0 && (
           <div style={S.card}>
-            <p style={S.sectionTitle}>🕐 RECENT INVOICES</p>
+            <p style={S.sectionTitle}>🕐 Recent Invoices</p>
             {invoices.slice(0,3).map(inv => (
-              <div key={inv.id} onClick={() => { setPreviewInv(inv); setScreen("preview"); }} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "#0B0F1A", borderRadius: 10, border: "1px solid #1E2D45", marginBottom: 8, cursor: "pointer" }}>
+              <div key={inv.id} onClick={() => { setPreviewInv(inv); setScreen("preview"); }} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "#F8FAFC", borderRadius: 8, border: "1px solid #E2E8F0", marginBottom: 8, cursor: "pointer" }}>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: "#E2E8F0" }}>{inv.meta.invoiceNo}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#1E293B" }}>{inv.meta.invoiceNo}</div>
                   <div style={{ fontSize: 11, color: "#64748B" }}>{inv.client.name || "No client"} · {inv.meta.date}</div>
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "#10B981" }}>₹{fmt(inv.grandTotal)}</div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#059669" }}>₹{fmt(inv.grandTotal)}</div>
               </div>
             ))}
           </div>
@@ -393,14 +394,14 @@ export default function App() {
 
       {/* Items */}
       <div style={S.card}>
-        <p style={S.sectionTitle}>ITEMS / SERVICES</p>
+        <p style={S.sectionTitle}>Items / Services</p>
         {items.map((item, idx) => {
           const c = calcItem(item);
           return (
-            <div key={item.id} style={{ background: "#0B0F1A", border: "1px solid #1E2D45", borderRadius: 12, padding: 14, marginBottom: 10 }}>
+            <div key={item.id} style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: 10, padding: 14, marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                <span style={{ fontSize: 12, color: "#3B82F6", fontFamily: "monospace" }}>ITEM {idx + 1}</span>
-                {items.length > 1 && <button onClick={() => removeItem(item.id)} style={{ background: "#EF444420", border: "none", borderRadius: 6, padding: "3px 10px", color: "#EF4444", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>✕ Remove</button>}
+                <span style={{ fontSize: 12, color: "#2563EB", fontFamily: "inherit", fontWeight: 700 }}>ITEM {idx + 1}</span>
+                {items.length > 1 && <button onClick={() => removeItem(item.id)} style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, padding: "3px 10px", color: "#DC2626", fontSize: 11, cursor: "pointer", fontFamily: "inherit" }}>✕ Remove</button>}
               </div>
               <div style={{ marginBottom: 8 }}>
                 <label style={S.label}>DESCRIPTION *</label>
@@ -433,19 +434,19 @@ export default function App() {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
                   <label style={S.label}>AMOUNT</label>
-                  <div style={{ background: "#111827", border: "1px solid #3B82F633", borderRadius: 10, padding: "10px 14px", fontSize: 14, fontWeight: 700, color: "#3B82F6" }}>₹{fmt(c.total)}</div>
+                  <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", fontSize: 14, fontWeight: 700, color: "#2563EB" }}>₹{fmt(c.total)}</div>
                 </div>
               </div>
             </div>
           );
         })}
-        <button onClick={addItem} style={{ ...S.btnOutline, width: "100%", borderStyle: "dashed", borderRadius: 10 }}>+ Add Item</button>
+        <button onClick={addItem} style={{ ...S.btnOutline, width: "100%", borderStyle: "dashed", borderRadius: 8 }}>+ Add Item</button>
       </div>
 
       {/* Totals */}
       <div style={S.card}>
-        <p style={S.sectionTitle}>SUMMARY</p>
-        <div style={{ background: "#0B0F1A", borderRadius: 12, padding: 16 }}>
+        <p style={S.sectionTitle}>Summary</p>
+        <div style={{ background: "#F8FAFC", borderRadius: 10, padding: 16, border: "1px solid #E2E8F0" }}>
           {[
             { label: "Subtotal", value: "₹" + fmt(subtotal) },
             ...(isIGST
@@ -453,14 +454,14 @@ export default function App() {
               : [{ label: "CGST", value: "₹" + fmt(totalGST/2) }, { label: "SGST", value: "₹" + fmt(totalGST/2) }]
             ),
           ].map((r, i) => (
-            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #1E2D45" }}>
-              <span style={{ fontSize: 13, color: "#94A3B8" }}>{r.label}</span>
-              <span style={{ fontSize: 13, color: "#E2E8F0", fontWeight: 600 }}>{r.value}</span>
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #E2E8F0" }}>
+              <span style={{ fontSize: 13, color: "#64748B" }}>{r.label}</span>
+              <span style={{ fontSize: 13, color: "#1E293B", fontWeight: 600 }}>{r.value}</span>
             </div>
           ))}
           <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0 4px" }}>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "#E2E8F0" }}>GRAND TOTAL</span>
-            <span style={{ fontSize: 20, fontWeight: 900, color: "#10B981" }}>₹{fmt(grandTotal)}</span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: "#1E293B" }}>GRAND TOTAL</span>
+            <span style={{ fontSize: 20, fontWeight: 900, color: "#059669" }}>₹{fmt(grandTotal)}</span>
           </div>
           <div style={{ fontSize: 11, color: "#64748B", fontStyle: "italic", marginTop: 4 }}>{toWords(Math.round(grandTotal))}</div>
         </div>
@@ -505,7 +506,7 @@ export default function App() {
   const invoiceListView = (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <p style={{ ...S.sectionTitle, margin: 0 }}>📋 ALL INVOICES ({invoices.length})</p>
+        <p style={{ ...S.sectionTitle, margin: 0 }}>📋 All Invoices ({invoices.length})</p>
         <button style={S.btn()} onClick={() => setScreen("New Invoice")}>+ New</button>
       </div>
       {invoices.length === 0 ? (
@@ -518,14 +519,14 @@ export default function App() {
         <div key={inv.id} style={{ ...S.card, cursor: "pointer", marginBottom: 10 }} onClick={() => { setPreviewInv(inv); setScreen("preview"); }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: "#E2E8F0", marginBottom: 4 }}>{inv.meta.invoiceNo}</div>
-              <div style={{ fontSize: 13, color: "#94A3B8", marginBottom: 3 }}>{inv.client.name || "—"}</div>
-              <div style={{ fontSize: 11, color: "#64748B", fontFamily: "monospace" }}>{inv.meta.date}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: "#1E293B", marginBottom: 4 }}>{inv.meta.invoiceNo}</div>
+              <div style={{ fontSize: 13, color: "#64748B", marginBottom: 3 }}>{inv.client.name || "—"}</div>
+              <div style={{ fontSize: 11, color: "#94A3B8", fontFamily: "inherit" }}>{inv.meta.date}</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 18, fontWeight: 900, color: "#10B981" }}>₹{fmt(inv.grandTotal)}</div>
-              <div style={{ fontSize: 10, color: "#64748B", marginTop: 4 }}>{inv.items.length} item{inv.items.length !== 1 ? "s" : ""}</div>
-              <div style={{ fontSize: 11, color: "#3B82F6", marginTop: 4 }}>Tap to view →</div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: "#059669" }}>₹{fmt(inv.grandTotal)}</div>
+              <div style={{ fontSize: 10, color: "#94A3B8", marginTop: 4 }}>{inv.items.length} item{inv.items.length !== 1 ? "s" : ""}</div>
+              <div style={{ fontSize: 11, color: "#2563EB", marginTop: 4, fontWeight: 600 }}>Tap to view →</div>
             </div>
           </div>
         </div>
@@ -633,23 +634,41 @@ export default function App() {
           #print-area { position: fixed; top: 0; left: 0; width: 100%; }
         }
         ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #0B0F1A; }
-        ::-webkit-scrollbar-thumb { background: #1E2D45; border-radius: 99px; }
+        ::-webkit-scrollbar-track { background: #F1F5F9; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
+
+        /* ── Mobile responsiveness ── */
+        @media (max-width: 560px) {
+          .app-header { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; padding: 14px 16px !important; }
+          .app-nav { width: 100% !important; }
+          .app-nav-btn { padding: 8px 10px !important; font-size: 11px !important; }
+          .app-nav-label { display: inline; }
+        }
+        @media (max-width: 380px) {
+          .app-subtitle { display: none; }
+          .app-nav-btn { padding: 7px 8px !important; font-size: 10px !important; }
+        }
+        .invoice-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .invoice-table-wrap table { min-width: 640px; }
+        .scroll-hint { display: none; }
+        @media (max-width: 700px) {
+          .scroll-hint { display: block; text-align: center; font-size: 10px; color: #94A3B8; padding: 6px; background: #F8FAFC; }
+        }
       `}</style>
 
       {/* Header */}
-      <div style={S.header}>
+      <div style={S.header} className="app-header">
         <div style={S.logo}>
           <div style={S.logoBox}>₹</div>
           <div>
             <div style={S.logoText}>GST Invoice</div>
-            <div style={{ fontSize: 9, color: "#3B82F6", fontFamily: "monospace", letterSpacing: 1 }}>PROFESSIONAL TOOL</div>
+            <div style={{ fontSize: 9, color: "#64748B", fontFamily: "inherit", letterSpacing: 1.5 }} className="app-subtitle">PROFESSIONAL TOOL</div>
           </div>
         </div>
-        <div style={S.nav}>
+        <div style={S.nav} className="app-nav">
           {SCREENS.map(s => (
-            <button key={s} style={S.navBtn(screen === s)} onClick={() => setScreen(s)}>
-              {s === "Dashboard" ? "🏠" : s === "New Invoice" ? "➕" : s === "My Invoices" ? "📋" : "⚙️"} {s}
+            <button key={s} style={S.navBtn(screen === s)} onClick={() => setScreen(s)} className="app-nav-btn">
+              {s === "Dashboard" ? "🏠" : s === "New Invoice" ? "➕" : s === "My Invoices" ? "📋" : "⚙️"} <span className="app-nav-label">{s}</span>
             </button>
           ))}
         </div>
