@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ref, onValue, set } from "firebase/database";
-import { db } from "./firebase";
+import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
+import { db, auth, googleProvider } from "./firebase";
 
 // ── helpers ──────────────────────────────────────────────
 const GST_RATES = [0, 5, 12, 18, 28];
@@ -39,6 +40,8 @@ const initMeta = { invoiceNo: "INV-001", date: today(), dueDate: "", placeOfSupp
 const SCREENS = ["Dashboard", "New Invoice", "My Invoices", "Settings"];
 
 export default function App() {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [screen, setScreen] = useState("Dashboard");
   const [biz, setBiz] = useState(initBiz);
   const [bizSaved, setBizSaved] = useState(false);
@@ -52,27 +55,29 @@ export default function App() {
   const [showPreview, setShowPreview] = useState(false);
   const printRef = useRef();
 
-  // ── load data from Firebase on app start ─────────────────
+  // ── Auth listener + per-user data load ───────────────────
   useEffect(() => {
-    const bizRef = ref(db, "business");
-    onValue(bizRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setBiz(data);
-        setBizSaved(true);
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setAuthLoading(false);
+      if (u) {
+        // load this user's business details
+        const bizRef = ref(db, `users/${u.uid}/business`);
+        onValue(bizRef, (snap) => {
+          const data = snap.val();
+          if (data) { setBiz(data); setBizSaved(true); }
+          else { setBiz(initBiz); setBizSaved(false); }
+        });
+        // load this user's invoices
+        const invRef = ref(db, `users/${u.uid}/invoices`);
+        onValue(invRef, (snap) => {
+          const data = snap.val();
+          if (data) setInvoices(Object.values(data).sort((a, b) => b.id - a.id));
+          else setInvoices([]);
+        });
       }
     });
-
-    const invRef = ref(db, "invoices");
-    onValue(invRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const list = Object.values(data).sort((a, b) => b.id - a.id);
-        setInvoices(list);
-      } else {
-        setInvoices([]);
-      }
-    });
+    return () => unsub();
   }, []);
 
   // ── compute totals ──────────────────────────────────────
@@ -90,7 +95,7 @@ export default function App() {
   // ── save invoice ────────────────────────────────────────
   const saveInvoice = () => {
     const inv = { id: Date.now(), meta: { ...meta }, client: { ...client }, items: [...items], biz: { ...biz }, grandTotal, subtotal, totalGST, isIGST };
-    set(ref(db, "invoices/" + inv.id), inv);
+    if (user) set(ref(db, `users/${user.uid}/invoices/${inv.id}`), inv);
     setMeta(m => ({ ...m, invoiceNo: "INV-" + String(parseInt(m.invoiceNo.replace(/\D/g,"") || 0) + 1).padStart(3,"0"), date: today() }));
     setClient(initClient);
     setItems([newItem()]);
@@ -600,7 +605,7 @@ export default function App() {
         </div>
       </div>
 
-      <button style={{ ...S.btn("#10B981"), width: "100%", padding: 14, fontSize: 14 }} onClick={() => { if (!biz.name || !biz.gstin) { alert("Business naam aur GSTIN zaroori hai!"); return; } set(ref(db, "business"), biz); setBizSaved(true); setScreen("Dashboard"); alert("✅ Business details save ho gayi!"); }}>
+      <button style={{ ...S.btn("#059669"), width: "100%", padding: 14, fontSize: 14 }} onClick={() => { if (!biz.name || !biz.gstin) { alert("Business naam aur GSTIN zaroori hai!"); return; } if (user) set(ref(db, `users/${user.uid}/business`), biz); setBizSaved(true); setScreen("Dashboard"); alert("✅ Business details save ho gayi!"); }}>
         💾 Save Business Details
       </button>
     </div>
@@ -623,11 +628,44 @@ export default function App() {
   })();
 
   // ── RENDER ────────────────────────────────────────────────
+
+  // Loading screen
+  if (authLoading) return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F1F5F9" }}>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ width: 48, height: 48, borderRadius: 12, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", margin: "0 auto 16px" }}>₹</div>
+        <p style={{ color: "#64748B", fontSize: 14 }}>Loading...</p>
+      </div>
+    </div>
+  );
+
+  // Login screen
+  if (!user) return (
+    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F1F5F9", padding: 20 }}>
+      <div style={{ background: "#fff", borderRadius: 16, padding: 40, maxWidth: 380, width: "100%", textAlign: "center", boxShadow: "0 4px 24px rgba(15,23,42,0.08)", border: "1px solid #E2E8F0" }}>
+        <div style={{ width: 56, height: 56, borderRadius: 14, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 700, color: "#fff", margin: "0 auto 20px" }}>₹</div>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", marginBottom: 8 }}>GST Invoice Tool</h1>
+        <p style={{ fontSize: 13, color: "#64748B", marginBottom: 8 }}>Professional GST invoicing for Indian businesses</p>
+        <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 28, flexWrap: "wrap" }}>
+          {["✅ Free to use", "🔒 Secure", "📱 Mobile friendly"].map(t => (
+            <span key={t} style={{ fontSize: 11, background: "#EFF6FF", color: "#2563EB", padding: "4px 10px", borderRadius: 99, fontWeight: 600 }}>{t}</span>
+          ))}
+        </div>
+        <button onClick={() => signInWithPopup(auth, googleProvider).catch(e => alert("Login failed: " + e.message))}
+          style={{ width: "100%", background: "#fff", border: "1.5px solid #E2E8F0", borderRadius: 10, padding: "12px 20px", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, color: "#1E293B", boxShadow: "0 1px 3px rgba(15,23,42,0.08)" }}>
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.2l6.8-6.8C35.8 2.5 30.2 0 24 0 14.7 0 6.7 5.4 2.7 13.3l7.9 6.1C12.6 13 17.9 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.5 2.8-2.1 5.2-4.5 6.8l7.1 5.5c4.1-3.8 6.5-9.4 6.5-16.3z"/><path fill="#FBBC05" d="M10.6 28.6A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.1.8-4.6l-7.9-6.1A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.8l8.1-6.2z"/><path fill="#34A853" d="M24 48c6.2 0 11.4-2 15.2-5.5l-7.1-5.5c-2 1.4-4.6 2.2-8.1 2.2-6.1 0-11.3-4.1-13.2-9.6l-8 6.2C6.6 42.6 14.7 48 24 48z"/></svg>
+          Sign in with Google
+        </button>
+        <p style={{ fontSize: 11, color: "#94A3B8", marginTop: 16 }}>Apna Google account use karo — bilkul free</p>
+      </div>
+    </div>
+  );
+
   return (
     <div style={S.app}>
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        input:focus, select:focus, textarea:focus { border-color: #3B82F6 !important; box-shadow: 0 0 0 3px #3B82F622; }
+        input:focus, select:focus, textarea:focus { border-color: #2563EB !important; box-shadow: 0 0 0 3px #2563EB22; }
         @media print {
           body * { visibility: hidden; }
           #print-area, #print-area * { visibility: visible; }
@@ -665,12 +703,17 @@ export default function App() {
             <div style={{ fontSize: 9, color: "#64748B", fontFamily: "inherit", letterSpacing: 1.5 }} className="app-subtitle">PROFESSIONAL TOOL</div>
           </div>
         </div>
-        <div style={S.nav} className="app-nav">
-          {SCREENS.map(s => (
-            <button key={s} style={S.navBtn(screen === s)} onClick={() => setScreen(s)} className="app-nav-btn">
-              {s === "Dashboard" ? "🏠" : s === "New Invoice" ? "➕" : s === "My Invoices" ? "📋" : "⚙️"} <span className="app-nav-label">{s}</span>
-            </button>
-          ))}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={S.nav} className="app-nav">
+            {SCREENS.map(s => (
+              <button key={s} style={S.navBtn(screen === s)} onClick={() => setScreen(s)} className="app-nav-btn">
+                {s === "Dashboard" ? "🏠" : s === "New Invoice" ? "➕" : s === "My Invoices" ? "📋" : "⚙️"} <span className="app-nav-label">{s}</span>
+              </button>
+            ))}
+          </div>
+          <button onClick={() => signOut(auth)} title="Sign out" style={{ background: "transparent", border: "1px solid #334155", borderRadius: 8, padding: "7px 10px", color: "#94A3B8", fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>
+            👤 {user.displayName?.split(" ")[0] || "User"} ↩
+          </button>
         </div>
       </div>
 
