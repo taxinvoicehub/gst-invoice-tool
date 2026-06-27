@@ -41,7 +41,7 @@ const HSN_DB = {
   "4811": { gst: 12, desc: "Paper/paperboard coated" },
   "6006": { gst: 12, desc: "Fabrics (woven/knitted)" },
   "6403": { gst: 12, desc: "Footwear (leather)" },
-  "6802": { gst: 12, desc: "Worked stone/granite" },
+  "6801": { gst: 12, desc: "Worked slate/stone (mosaic)" },
   "7010": { gst: 12, desc: "Glass bottles/containers" },
   "8443": { gst: 12, desc: "Printing machinery" },
   "8471": { gst: 12, desc: "Computers/laptops" },
@@ -131,7 +131,7 @@ const HSN_DB = {
   // 28%
   "2402": { gst: 28, desc: "Cigars/cigarettes/tobacco" },
   "2403": { gst: 28, desc: "Tobacco products" },
-  "2501": { gst: 28, desc: "Cement/building plaster" },
+  "2523": { gst: 28, desc: "Portland cement/clinker" },
   "2523": { gst: 28, desc: "Portland cement" },
   "3303": { gst: 28, desc: "Perfumes/toilet waters" },
   "3304": { gst: 28, desc: "Beauty/makeup preparations" },
