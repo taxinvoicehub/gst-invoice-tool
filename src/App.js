@@ -5,12 +5,157 @@ import { db, auth, googleProvider } from "./firebase";
 
 // ── helpers ──────────────────────────────────────────────
 const GST_RATES = [0, 5, 12, 18, 28];
+
+// HSN Code → { gst, desc } database (common items)
+const HSN_DB = {
+  // 0% - Essentials
+  "0101": { gst: 0, desc: "Live horses/asses/mules" },
+  "0201": { gst: 0, desc: "Fresh/chilled meat" },
+  "0401": { gst: 0, desc: "Fresh milk" },
+  "0701": { gst: 0, desc: "Fresh vegetables" },
+  "0801": { gst: 0, desc: "Fresh fruits" },
+  "1001": { gst: 0, desc: "Wheat/meslin" },
+  "1006": { gst: 0, desc: "Rice" },
+  "1101": { gst: 0, desc: "Wheat/meslin flour" },
+  "2501": { gst: 0, desc: "Salt (common/table)" },
+  "4901": { gst: 0, desc: "Printed books/newspapers" },
+  "4902": { gst: 0, desc: "Newspapers/journals" },
+  // 5%
+  "0902": { gst: 5, desc: "Tea (green/black)" },
+  "0901": { gst: 5, desc: "Coffee (roasted/not)" },
+  "1211": { gst: 5, desc: "Plants/spices/seeds" },
+  "1701": { gst: 5, desc: "Cane/beet sugar" },
+  "1902": { gst: 5, desc: "Pasta/noodles" },
+  "2106": { gst: 5, desc: "Food preparations" },
+  "2202": { gst: 5, desc: "Mineral water (packaged)" },
+  "2710": { gst: 5, desc: "Petroleum oils/kerosene" },
+  "3002": { gst: 5, desc: "Vaccines/blood/medicines" },
+  "3004": { gst: 5, desc: "Medicaments/medicines" },
+  "6101": { gst: 5, desc: "Woollen overcoats/clothing" },
+  "6201": { gst: 5, desc: "Men's overcoats (cotton)" },
+  "9985": { gst: 5, desc: "Transport services" },
+  "9954": { gst: 5, desc: "Construction services (affordable housing)" },
+  // 12%
+  "3926": { gst: 12, desc: "Plastic articles" },
+  "4002": { gst: 12, desc: "Rubber (synthetic)" },
+  "4811": { gst: 12, desc: "Paper/paperboard coated" },
+  "6006": { gst: 12, desc: "Fabrics (woven/knitted)" },
+  "6403": { gst: 12, desc: "Footwear (leather)" },
+  "6802": { gst: 12, desc: "Worked stone/granite" },
+  "7010": { gst: 12, desc: "Glass bottles/containers" },
+  "8443": { gst: 12, desc: "Printing machinery" },
+  "8471": { gst: 12, desc: "Computers/laptops" },
+  "8517": { gst: 12, desc: "Telephone/mobile phones" },
+  "8528": { gst: 12, desc: "TV monitors/projectors" },
+  "9018": { gst: 12, desc: "Medical instruments" },
+  "9403": { gst: 12, desc: "Furniture (other)" },
+  "9992": { gst: 12, desc: "Education services" },
+  // 18% - Most common
+  "2401": { gst: 18, desc: "Tobacco (unmanufactured)" },
+  "2804": { gst: 18, desc: "Industrial gases (oxygen etc)" },
+  "3208": { gst: 18, desc: "Paints/varnishes" },
+  "3209": { gst: 18, desc: "Water-based paints" },
+  "3214": { gst: 18, desc: "Glaziers putty/sealants" },
+  "3301": { gst: 18, desc: "Essential oils/perfumes" },
+  "3401": { gst: 18, desc: "Soap/washing products" },
+  "3808": { gst: 18, desc: "Insecticides/pesticides" },
+  "3901": { gst: 18, desc: "Polymers/polyethylene" },
+  "3917": { gst: 18, desc: "PVC pipes/tubes" },
+  "3922": { gst: 18, desc: "Baths/showers/sinks (plastic)" },
+  "4008": { gst: 18, desc: "Rubber plates/sheets" },
+  "4016": { gst: 18, desc: "Rubber articles" },
+  "4407": { gst: 18, desc: "Wood sawn/chipped" },
+  "4412": { gst: 18, desc: "Plywood/veneer panels" },
+  "4418": { gst: 18, desc: "Builders' joinery (wood)" },
+  "4421": { gst: 18, desc: "WPC/wood articles" },
+  "4802": { gst: 18, desc: "Uncoated paper/writing paper" },
+  "5402": { gst: 18, desc: "Synthetic yarn/filament" },
+  "5603": { gst: 18, desc: "Nonwovens fabric" },
+  "6802": { gst: 18, desc: "Granite/marble (worked)" },
+  "6901": { gst: 18, desc: "Bricks/tiles/ceramic" },
+  "6904": { gst: 18, desc: "Ceramic building bricks" },
+  "7002": { gst: 18, desc: "Glass (in balls/rods)" },
+  "7201": { gst: 18, desc: "Pig iron/cast iron" },
+  "7204": { gst: 18, desc: "Ferrous waste/scrap" },
+  "7207": { gst: 18, desc: "Semi-finished iron/steel" },
+  "7208": { gst: 18, desc: "Iron/steel flat-rolled" },
+  "7210": { gst: 18, desc: "Flat-rolled iron coated" },
+  "7213": { gst: 18, desc: "Iron/steel bars/rods (wire)" },
+  "7214": { gst: 18, desc: "Iron/steel bars (forged)" },
+  "7215": { gst: 18, desc: "Steel bars/rods (other)" },
+  "7216": { gst: 18, desc: "Iron/steel angles/shapes" },
+  "7217": { gst: 18, desc: "Iron/steel wire" },
+  "7219": { gst: 18, desc: "Stainless steel flat-rolled" },
+  "7220": { gst: 18, desc: "Stainless steel (narrow)" },
+  "7222": { gst: 18, desc: "Stainless steel bars/rods" },
+  "7225": { gst: 18, desc: "Flat-rolled alloy steel" },
+  "7228": { gst: 18, desc: "Other alloy steel bars" },
+  "7229": { gst: 18, desc: "Alloy steel wire" },
+  "7301": { gst: 18, desc: "Sheet piling iron/steel" },
+  "7304": { gst: 18, desc: "Tubes/pipes (seamless steel)" },
+  "7308": { gst: 18, desc: "Structures (iron/steel)" },
+  "7312": { gst: 18, desc: "Stranded wire/cables (iron)" },
+  "7314": { gst: 18, desc: "Cloth/grill (iron/steel wire)" },
+  "7317": { gst: 18, desc: "Nails/tacks/staples (steel)" },
+  "7318": { gst: 18, desc: "Screws/bolts/nuts (steel)" },
+  "7323": { gst: 18, desc: "Table/kitchen iron articles" },
+  "7326": { gst: 18, desc: "Iron/steel articles (other)" },
+  "7408": { gst: 18, desc: "Copper wire" },
+  "7606": { gst: 18, desc: "Aluminium plates/sheets" },
+  "7610": { gst: 18, desc: "Aluminium structures" },
+  "8301": { gst: 18, desc: "Padlocks/locks (metal)" },
+  "8302": { gst: 18, desc: "Hinges/handles/fittings" },
+  "8311": { gst: 18, desc: "Wire/rods (welding)" },
+  "8413": { gst: 18, desc: "Pumps for liquids" },
+  "8414": { gst: 18, desc: "Air pumps/compressors/fans" },
+  "8415": { gst: 18, desc: "Air conditioning machines" },
+  "8418": { gst: 18, desc: "Refrigerators/freezers" },
+  "8421": { gst: 18, desc: "Centrifuges/filters" },
+  "8422": { gst: 18, desc: "Dish washing machines" },
+  "8450": { gst: 18, desc: "Washing machines" },
+  "8467": { gst: 18, desc: "Hand tools (pneumatic)" },
+  "8481": { gst: 18, desc: "Taps/valves/fittings (pipes)" },
+  "8501": { gst: 18, desc: "Electric motors/generators" },
+  "8504": { gst: 18, desc: "Transformers/converters" },
+  "8507": { gst: 18, desc: "Electric batteries" },
+  "8536": { gst: 18, desc: "Electrical switches/boards" },
+  "8544": { gst: 18, desc: "Electric wire/cable" },
+  "8702": { gst: 18, desc: "Motor vehicles (10+ persons)" },
+  "9405": { gst: 18, desc: "Lamps/lighting fittings" },
+  "9506": { gst: 18, desc: "Sports equipment" },
+  "9983": { gst: 18, desc: "IT/software services" },
+  "9987": { gst: 18, desc: "Repair/maintenance services" },
+  "9997": { gst: 18, desc: "Other services" },
+  "9998": { gst: 18, desc: "Professional services (CA/legal)" },
+  "9999": { gst: 18, desc: "Consulting/freelance services" },
+  // 28%
+  "2402": { gst: 28, desc: "Cigars/cigarettes/tobacco" },
+  "2403": { gst: 28, desc: "Tobacco products" },
+  "2501": { gst: 28, desc: "Cement/building plaster" },
+  "2523": { gst: 28, desc: "Portland cement" },
+  "3303": { gst: 28, desc: "Perfumes/toilet waters" },
+  "3304": { gst: 28, desc: "Beauty/makeup preparations" },
+  "3305": { gst: 28, desc: "Hair preparations/shampoo" },
+  "8703": { gst: 28, desc: "Motor cars/vehicles" },
+  "8711": { gst: 28, desc: "Motorcycles/mopeds" },
+  "8901": { gst: 28, desc: "Cruise ships/vessels" },
+  "9504": { gst: 28, desc: "Video games/gaming consoles" },
+};
+
+// HSN lookup function
+const lookupHSN = (code) => {
+  if (!code || code.length < 4) return null;
+  // Try exact match first, then 4-digit prefix
+  return HSN_DB[code] || HSN_DB[code.substring(0, 4)] || null;
+};
 const STATES = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Delhi","Jammu & Kashmir","Ladakh","Chandigarh","Dadra & Nagar Haveli","Daman & Diu","Lakshadweep","Puducherry"];
 
 function calcItem(item) {
   const base = (parseFloat(item.qty) || 0) * (parseFloat(item.rate) || 0);
-  const gstAmt = base * (parseFloat(item.gst) || 0) / 100;
-  return { base, gstAmt, total: base + gstAmt };
+  const discAmt = base * (parseFloat(item.discount) || 0) / 100;
+  const taxable = base - discAmt;
+  const gstAmt = taxable * (parseFloat(item.gst) || 0) / 100;
+  return { base, discAmt, taxable, gstAmt, total: taxable + gstAmt };
 }
 
 function toWords(n) {
@@ -29,12 +174,14 @@ function toWords(n) {
 
 const fmt = n => Number(n || 0).toFixed(2);
 const today = () => new Date().toISOString().split("T")[0];
-const newItem = () => ({ id: Date.now(), desc: "", hsn: "", qty: "", rate: "", gst: 18, unit: "Nos" });
+const newItem = () => ({ id: Date.now(), desc: "", hsn: "", qty: "", rate: "", gst: 18, unit: "Nos", size: "", discount: 0 });
+
+const UNITS = ["Nos","Kg","Ltr","Mtr","Box","Set","Pair","Hrs","Days","Pcs","SQF","SFT","RFT","CFT","MT","Ton","Bag","Roll","Sheet","Bundle","Dozen"];
 
 // ── initial state ─────────────────────────────────────────
-const initBiz = { name: "", gstin: "", address: "", city: "", state: "Maharashtra", pin: "", phone: "", email: "", bank: "", ifsc: "", account: "" };
-const initClient = { name: "", gstin: "", address: "", city: "", state: "Maharashtra", pin: "", phone: "", email: "" };
-const initMeta = { invoiceNo: "INV-001", date: today(), dueDate: "", placeOfSupply: "Maharashtra", notes: "Thank you for your business!", terms: "Payment due within 30 days." };
+const initBiz = { name: "", gstin: "", address: "", city: "", state: "Maharashtra", pin: "", phone: "", email: "", bank: "", ifsc: "", account: "", cin: "" };
+const initClient = { name: "", gstin: "", address: "", city: "", state: "Maharashtra", pin: "", phone: "", email: "", shipName: "", shipAddress: "", shipCity: "", shipState: "Maharashtra", shipPin: "" };
+const initMeta = { invoiceNo: "INV-001", date: today(), dueDate: "", placeOfSupply: "Maharashtra", notes: "Thank you for your business!", terms: "1. Goods once sold will not be taken back.\n2. Interest @18% p.a. will be charged if payment is not made within stipulated time.\n3. Subject to local jurisdiction only.", reverseCharge: "N", copyType: "Original", poNumber: "" };
 
 // ── SCREENS ───────────────────────────────────────────────
 const SCREENS = ["Dashboard", "New Invoice", "My Invoices", "Settings"];
@@ -82,8 +229,9 @@ export default function App() {
 
   // ── compute totals ──────────────────────────────────────
   const computed = items.map(calcItem);
-  const subtotal = computed.reduce((s, c) => s + c.base, 0);
+  const subtotal = computed.reduce((s, c) => s + c.taxable, 0);
   const totalGST = computed.reduce((s, c) => s + c.gstAmt, 0);
+  const totalDiscount = computed.reduce((s, c) => s + c.discAmt, 0);
   const grandTotal = subtotal + totalGST;
   const isIGST = biz.state !== meta.placeOfSupply;
 
@@ -128,51 +276,84 @@ export default function App() {
   // ── PRINT COMPONENT (regular function, not JSX component, to avoid focus bugs) ──
   const renderInvoicePrint = (inv) => {
     const { meta, client, items, biz, grandTotal, subtotal, totalGST, isIGST, computed } = inv;
+    const invComputed = computed || items.map(calcItem);
+    const invSubtotal = invComputed.reduce((s,c) => s + c.taxable, 0);
+    const invTotalGST = invComputed.reduce((s,c) => s + c.gstAmt, 0);
+    const invDiscount = invComputed.reduce((s,c) => s + c.discAmt, 0);
+    const invGrand = invSubtotal + invTotalGST;
+
+    // Tax rate-wise breakup
+    const taxBreakup = {};
+    items.forEach((item, i) => {
+      const c = invComputed[i];
+      const rate = item.gst;
+      if (!taxBreakup[rate]) taxBreakup[rate] = { taxable: 0, cgst: 0, sgst: 0, igst: 0 };
+      taxBreakup[rate].taxable += c.taxable;
+      if (isIGST) taxBreakup[rate].igst += c.gstAmt;
+      else { taxBreakup[rate].cgst += c.gstAmt/2; taxBreakup[rate].sgst += c.gstAmt/2; }
+    });
+
     const ps = { background: "#fff", color: "#111", borderRadius: 12, overflow: "hidden", boxShadow: "0 20px 60px #00000044", fontFamily: "Arial, sans-serif", fontSize: 12 };
     return (
       <div ref={printRef} id="print-area" style={ps}>
         <style>{`@media print { body { margin: 0; } }`}</style>
+
         {/* Header */}
-        <div style={{ background: "linear-gradient(135deg, #1E3A5F, #1D4ED8)", padding: "24px 28px", color: "#fff" }}>
+        <div style={{ background: "linear-gradient(135deg, #1E3A5F, #1D4ED8)", padding: "20px 24px", color: "#fff", position: "relative" }}>
+          {/* Original Copy badge */}
+          <div style={{ position: "absolute", top: 12, right: 12, background: "#ffffff22", border: "1px solid #ffffff44", borderRadius: 6, padding: "3px 10px", fontSize: 10, fontWeight: 700, letterSpacing: 1 }}>{(meta.copyType || "Original").toUpperCase()} COPY</div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
             <div>
-              <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 4 }}>{biz.name || "Your Business Name"}</div>
-              <div style={{ fontSize: 12, opacity: 0.8 }}>{biz.address}{biz.city ? ", " + biz.city : ""}</div>
-              <div style={{ fontSize: 12, opacity: 0.8 }}>{biz.state}{biz.pin ? " - " + biz.pin : ""}</div>
-              {biz.phone && <div style={{ fontSize: 12, opacity: 0.8 }}>📞 {biz.phone}</div>}
-              {biz.gstin && <div style={{ fontSize: 12, marginTop: 6, background: "#ffffff22", padding: "3px 10px", borderRadius: 99, display: "inline-block" }}>GSTIN: {biz.gstin}</div>}
+              <div style={{ fontSize: 20, fontWeight: 900, marginBottom: 2 }}>{biz.name || "Your Business Name"}</div>
+              {biz.cin && <div style={{ fontSize: 10, opacity: 0.7 }}>CIN: {biz.cin}</div>}
+              <div style={{ fontSize: 11, opacity: 0.85, marginTop: 4 }}>{biz.address}{biz.city ? ", " + biz.city : ""}</div>
+              <div style={{ fontSize: 11, opacity: 0.85 }}>{biz.state}{biz.pin ? " - " + biz.pin : ""}</div>
+              {biz.phone && <div style={{ fontSize: 11, opacity: 0.85 }}>📞 {biz.phone}</div>}
+              {biz.email && <div style={{ fontSize: 11, opacity: 0.85 }}>✉ {biz.email}</div>}
+              {biz.gstin && <div style={{ fontSize: 11, marginTop: 6, background: "#ffffff22", padding: "3px 10px", borderRadius: 99, display: "inline-block" }}>GSTIN: {biz.gstin}</div>}
             </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 2 }}>INVOICE</div>
-              <div style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>#{meta.invoiceNo}</div>
-              <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>Date: {meta.date}</div>
-              {meta.dueDate && <div style={{ fontSize: 12, opacity: 0.7 }}>Due: {meta.dueDate}</div>}
+            <div style={{ textAlign: "right", marginTop: 20 }}>
+              <div style={{ fontSize: 24, fontWeight: 900, letterSpacing: 2 }}>TAX INVOICE</div>
+              <div style={{ fontSize: 13, opacity: 0.9, marginTop: 4 }}>#{meta.invoiceNo}</div>
+              <div style={{ fontSize: 11, opacity: 0.7, marginTop: 2 }}>Date: {meta.date}</div>
+              {meta.dueDate && <div style={{ fontSize: 11, opacity: 0.7 }}>Due: {meta.dueDate}</div>}
+              {meta.poNumber && <div style={{ fontSize: 11, opacity: 0.7 }}>PO: {meta.poNumber}</div>}
+              <div style={{ fontSize: 11, opacity: 0.7 }}>Reverse Charge: {meta.reverseCharge || "N"}</div>
             </div>
           </div>
         </div>
 
-        {/* Bill To */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 0, borderBottom: "1px solid #E5E7EB" }}>
-          <div style={{ padding: "16px 24px", borderRight: "1px solid #E5E7EB" }}>
-            <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 8, fontWeight: 700 }}>BILL TO</div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#111" }}>{client.name || "—"}</div>
-            {client.gstin && <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>GSTIN: {client.gstin}</div>}
-            {client.address && <div style={{ fontSize: 11, color: "#374151", marginTop: 4 }}>{client.address}</div>}
-            {client.city && <div style={{ fontSize: 11, color: "#374151" }}>{client.city}, {client.state} {client.pin}</div>}
-            {client.phone && <div style={{ fontSize: 11, color: "#374151", marginTop: 2 }}>📞 {client.phone}</div>}
+        {/* Bill To + Ship To + Invoice Info */}
+        <div style={{ display: "grid", gridTemplateColumns: client.shipAddress ? "1fr 1fr 1fr" : "1fr 1fr", gap: 0, borderBottom: "1px solid #E5E7EB" }}>
+          <div style={{ padding: "14px 20px", borderRight: "1px solid #E5E7EB" }}>
+            <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 6, fontWeight: 700 }}>BILL TO</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: "#111" }}>{client.name || "—"}</div>
+            {client.gstin && <div style={{ fontSize: 10, color: "#6B7280", marginTop: 2 }}>GSTIN: {client.gstin}</div>}
+            {client.address && <div style={{ fontSize: 10, color: "#374151", marginTop: 3 }}>{client.address}</div>}
+            {client.city && <div style={{ fontSize: 10, color: "#374151" }}>{client.city}, {client.state} {client.pin}</div>}
+            {client.phone && <div style={{ fontSize: 10, color: "#374151", marginTop: 2 }}>📞 {client.phone}</div>}
           </div>
-          <div style={{ padding: "16px 24px" }}>
-            <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 8, fontWeight: 700 }}>INVOICE INFO</div>
+          {client.shipAddress && (
+            <div style={{ padding: "14px 20px", borderRight: "1px solid #E5E7EB" }}>
+              <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 6, fontWeight: 700 }}>SHIP TO</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: "#111" }}>{client.shipName || client.name}</div>
+              <div style={{ fontSize: 10, color: "#374151", marginTop: 3 }}>{client.shipAddress}</div>
+              {client.shipCity && <div style={{ fontSize: 10, color: "#374151" }}>{client.shipCity}, {client.shipState} {client.shipPin}</div>}
+            </div>
+          )}
+          <div style={{ padding: "14px 20px" }}>
+            <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 6, fontWeight: 700 }}>INVOICE INFO</div>
             {[
               ["Invoice No", meta.invoiceNo],
-              ["Invoice Date", meta.date],
+              ["Date", meta.date],
               ["Due Date", meta.dueDate || "—"],
               ["Place of Supply", meta.placeOfSupply],
-              ["GST Type", isIGST ? "IGST (Inter-state)" : "CGST + SGST (Intra-state)"],
+              ["GST Type", isIGST ? "IGST" : "CGST + SGST"],
+              ["Reverse Charge", meta.reverseCharge || "N"],
             ].map(([k, v]) => (
-              <div key={k} style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                <span style={{ color: "#6B7280", fontSize: 11 }}>{k}:</span>
-                <span style={{ fontWeight: 600, fontSize: 11 }}>{v}</span>
+              <div key={k} style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+                <span style={{ color: "#6B7280", fontSize: 10 }}>{k}:</span>
+                <span style={{ fontWeight: 600, fontSize: 10 }}>{v}</span>
               </div>
             ))}
           </div>
@@ -184,75 +365,134 @@ export default function App() {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ background: "#F1F5F9" }}>
-                {["#", "Description", "HSN", "Qty", "Unit", "Rate", "GST%", "GST Amt", "Total"].map(h => (
-                  <th key={h} style={{ padding: "10px 12px", textAlign: h === "#" ? "center" : h === "Total" || h === "GST Amt" || h === "Rate" ? "right" : "left", fontSize: 10, color: "#6B7280", fontWeight: 700, letterSpacing: 1, borderBottom: "2px solid #E5E7EB" }}>{h}</th>
+                {["S.N.", "Description of Goods", "HSN/SAC", "Qty", "Unit", "Price", "Disc%", "CGST Rate", "CGST Amt", "SGST Rate", "SGST Amt", "Amount"].map(h => (
+                  <th key={h} style={{ padding: "8px 10px", textAlign: ["Price","CGST Amt","SGST Amt","Amount"].includes(h) ? "right" : ["CGST Rate","SGST Rate","Disc%"].includes(h) ? "center" : "left", fontSize: 9, color: "#6B7280", fontWeight: 700, letterSpacing: 0.5, borderBottom: "2px solid #E5E7EB", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {items.map((item, i) => {
-                const c = computed ? computed[i] : calcItem(item);
+                const c = invComputed[i];
+                const halfGST = item.gst / 2;
                 return (
-                  <tr key={item.id} style={{ borderBottom: "1px solid #F3F4F6", background: i % 2 === 0 ? "#fff" : "#FAFAFA" }}>
-                    <td style={{ padding: "10px 12px", textAlign: "center", color: "#9CA3AF", fontSize: 11 }}>{i + 1}</td>
-                    <td style={{ padding: "10px 12px", fontWeight: 600, color: "#111" }}>{item.desc}</td>
-                    <td style={{ padding: "10px 12px", color: "#6B7280", fontSize: 11 }}>{item.hsn || "—"}</td>
-                    <td style={{ padding: "10px 12px", textAlign: "center" }}>{item.qty}</td>
-                    <td style={{ padding: "10px 12px", color: "#6B7280", fontSize: 11 }}>{item.unit}</td>
-                    <td style={{ padding: "10px 12px", textAlign: "right" }}>₹{fmt(item.rate)}</td>
-                    <td style={{ padding: "10px 12px", textAlign: "center", color: "#6B7280" }}>{item.gst}%</td>
-                    <td style={{ padding: "10px 12px", textAlign: "right", color: "#6B7280" }}>₹{fmt(c.gstAmt)}</td>
-                    <td style={{ padding: "10px 12px", textAlign: "right", fontWeight: 700, color: "#1D4ED8" }}>₹{fmt(c.total)}</td>
+                  <tr key={item.id || i} style={{ borderBottom: "1px solid #F3F4F6", background: i % 2 === 0 ? "#fff" : "#FAFAFA" }}>
+                    <td style={{ padding: "8px 10px", textAlign: "center", color: "#9CA3AF", fontSize: 10 }}>{i + 1}</td>
+                    <td style={{ padding: "8px 10px", fontWeight: 600, color: "#111", fontSize: 11 }}>
+                      {item.desc}
+                      {item.size && <div style={{ fontSize: 9, color: "#6B7280", marginTop: 2 }}>{item.size}</div>}
+                    </td>
+                    <td style={{ padding: "8px 10px", color: "#6B7280", fontSize: 10 }}>{item.hsn || "—"}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "center", fontSize: 10 }}>{item.qty}</td>
+                    <td style={{ padding: "8px 10px", color: "#6B7280", fontSize: 10 }}>{item.unit}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontSize: 10 }}>₹{fmt(item.rate)}</td>
+                    <td style={{ padding: "8px 10px", textAlign: "center", color: "#6B7280", fontSize: 10 }}>{item.discount > 0 ? item.discount + "%" : "—"}</td>
+                    {isIGST ? (
+                      <>
+                        <td style={{ padding: "8px 10px", textAlign: "center", fontSize: 10 }} colSpan={2}>IGST {item.gst}%</td>
+                        <td style={{ padding: "8px 10px", textAlign: "right", fontSize: 10 }} colSpan={2}>₹{fmt(c.gstAmt)}</td>
+                      </>
+                    ) : (
+                      <>
+                        <td style={{ padding: "8px 10px", textAlign: "center", fontSize: 10 }}>{halfGST}%</td>
+                        <td style={{ padding: "8px 10px", textAlign: "right", fontSize: 10 }}>₹{fmt(c.gstAmt/2)}</td>
+                        <td style={{ padding: "8px 10px", textAlign: "center", fontSize: 10 }}>{halfGST}%</td>
+                        <td style={{ padding: "8px 10px", textAlign: "right", fontSize: 10 }}>₹{fmt(c.gstAmt/2)}</td>
+                      </>
+                    )}
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontWeight: 700, color: "#1D4ED8", fontSize: 11 }}>₹{fmt(c.total)}</td>
                   </tr>
                 );
               })}
             </tbody>
+            <tfoot>
+              <tr style={{ background: "#F8FAFC", fontWeight: 700 }}>
+                <td colSpan={3} style={{ padding: "8px 10px", fontSize: 10, color: "#374151" }}>Grand Total: {items.reduce((s,i)=>(parseFloat(i.qty)||0)+s,0)} items</td>
+                <td colSpan={9} style={{ padding: "8px 10px", textAlign: "right", fontSize: 12, color: "#1D4ED8" }}>₹{fmt(invGrand || grandTotal)}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
 
-        {/* Totals */}
+        {/* Tax Summary Table */}
+        <div style={{ borderTop: "1px solid #E5E7EB", padding: "12px 20px", background: "#F8FAFC" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#374151", marginBottom: 6 }}>TAX SUMMARY</div>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 10 }}>
+            <thead>
+              <tr>
+                {["Tax Rate", "Taxable Amt", ...(isIGST ? ["IGST Amt"] : ["CGST Amt", "SGST Amt"]), "Total Tax"].map(h => (
+                  <th key={h} style={{ textAlign: "left", padding: "4px 8px", color: "#6B7280", fontWeight: 700, borderBottom: "1px solid #E5E7EB" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(taxBreakup).map(([rate, t]) => (
+                <tr key={rate}>
+                  <td style={{ padding: "4px 8px" }}>{rate}%</td>
+                  <td style={{ padding: "4px 8px" }}>₹{fmt(t.taxable)}</td>
+                  {isIGST ? <td style={{ padding: "4px 8px" }}>₹{fmt(t.igst)}</td> : <><td style={{ padding: "4px 8px" }}>₹{fmt(t.cgst)}</td><td style={{ padding: "4px 8px" }}>₹{fmt(t.sgst)}</td></>}
+                  <td style={{ padding: "4px 8px", fontWeight: 700 }}>₹{fmt(t.cgst + t.sgst + t.igst)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Bottom section */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "2px solid #E5E7EB" }}>
-          <div style={{ padding: "16px 24px" }}>
+          <div style={{ padding: "16px 20px" }}>
             {biz.bank && (
-              <div>
-                <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 8, fontWeight: 700 }}>BANK DETAILS</div>
-                <div style={{ fontSize: 11, color: "#374151" }}>Bank: {biz.bank}</div>
-                <div style={{ fontSize: 11, color: "#374151" }}>A/C: {biz.account}</div>
-                <div style={{ fontSize: 11, color: "#374151" }}>IFSC: {biz.ifsc}</div>
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 1.5, marginBottom: 4, fontWeight: 700 }}>BANK DETAILS</div>
+                <div style={{ fontSize: 10, color: "#374151" }}>Bank: {biz.bank}</div>
+                <div style={{ fontSize: 10, color: "#374151" }}>A/C: {biz.account}</div>
+                <div style={{ fontSize: 10, color: "#374151" }}>IFSC: {biz.ifsc}</div>
               </div>
             )}
             {meta.notes && (
-              <div style={{ marginTop: 12 }}>
-                <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 2, marginBottom: 4, fontWeight: 700 }}>NOTES</div>
-                <div style={{ fontSize: 11, color: "#374151" }}>{meta.notes}</div>
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 10, color: "#6B7280", letterSpacing: 1.5, marginBottom: 4, fontWeight: 700 }}>NOTES</div>
+                <div style={{ fontSize: 10, color: "#374151" }}>{meta.notes}</div>
               </div>
             )}
           </div>
-          <div style={{ padding: "16px 24px", background: "#F8FAFC" }}>
+          <div style={{ padding: "16px 20px", background: "#F8FAFC", borderLeft: "1px solid #E5E7EB" }}>
             {[
-              ["Subtotal", "₹" + fmt(subtotal)],
-              ...(isIGST
-                ? [["IGST", "₹" + fmt(totalGST)]]
-                : [["CGST", "₹" + fmt(totalGST/2)], ["SGST", "₹" + fmt(totalGST/2)]]
-              ),
+              ["Gross Total", "₹" + fmt(invComputed.reduce((s,c)=>s+c.base,0))],
+              ...(invDiscount > 0 ? [["Discount", "- ₹" + fmt(invDiscount)]] : []),
+              ["Taxable Amount", "₹" + fmt(invSubtotal || subtotal)],
+              ...(isIGST ? [["IGST", "₹" + fmt(invTotalGST || totalGST)]] : [["CGST", "₹" + fmt((invTotalGST||totalGST)/2)], ["SGST", "₹" + fmt((invTotalGST||totalGST)/2)]]),
             ].map(([k, v]) => (
-              <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #E5E7EB", fontSize: 12 }}>
+              <div key={k} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid #E5E7EB", fontSize: 11 }}>
                 <span style={{ color: "#6B7280" }}>{k}</span>
                 <span style={{ fontWeight: 600 }}>{v}</span>
               </div>
             ))}
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0 4px", marginTop: 4 }}>
-              <span style={{ fontSize: 14, fontWeight: 800 }}>TOTAL</span>
-              <span style={{ fontSize: 20, fontWeight: 900, color: "#1D4ED8" }}>₹{fmt(grandTotal)}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0 2px", marginTop: 4 }}>
+              <span style={{ fontSize: 13, fontWeight: 800 }}>TOTAL</span>
+              <span style={{ fontSize: 18, fontWeight: 900, color: "#1D4ED8" }}>₹{fmt(invGrand || grandTotal)}</span>
             </div>
-            <div style={{ fontSize: 10, color: "#9CA3AF", fontStyle: "italic", marginTop: 4 }}>{toWords(Math.round(grandTotal))}</div>
+            <div style={{ fontSize: 9, color: "#9CA3AF", fontStyle: "italic", marginTop: 3 }}>{toWords(Math.round(invGrand || grandTotal))}</div>
+          </div>
+        </div>
+
+        {/* Terms + Authorised Signatory */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "1px solid #E5E7EB" }}>
+          <div style={{ padding: "12px 20px" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#374151", marginBottom: 4 }}>TERMS & CONDITIONS</div>
+            <div style={{ fontSize: 9, color: "#6B7280", whiteSpace: "pre-line" }}>{meta.terms}</div>
+            <div style={{ fontSize: 9, color: "#9CA3AF", marginTop: 8 }}>E. & O.E.</div>
+          </div>
+          <div style={{ padding: "12px 20px", borderLeft: "1px solid #E5E7EB", textAlign: "right" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#374151", marginBottom: 4 }}>For {biz.name || "Your Business"}</div>
+            <div style={{ height: 40 }}></div>
+            <div style={{ fontSize: 10, color: "#374151", borderTop: "1px solid #374151", paddingTop: 4, display: "inline-block", minWidth: 120 }}>Authorised Signatory</div>
           </div>
         </div>
 
         {/* Footer */}
-        <div style={{ background: "#1E3A5F", padding: "12px 24px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-          <div style={{ color: "#93C5FD", fontSize: 11 }}>{meta.terms}</div>
-          <div style={{ color: "#93C5FD", fontSize: 10, opacity: 0.7 }}>Generated by GST Invoice Tool</div>
+        <div style={{ background: "#1E3A5F", padding: "8px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ color: "#93C5FD", fontSize: 10 }}>This is a computer generated invoice</div>
+          <div style={{ color: "#93C5FD", fontSize: 10, opacity: 0.7 }}>GST Invoice Tool</div>
         </div>
       </div>
     );
@@ -353,6 +593,23 @@ export default function App() {
               {STATES.map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
+          <div>
+            <label style={S.label}>REVERSE CHARGE</label>
+            <select style={S.select} value={meta.reverseCharge} onChange={e => setMeta(m => ({...m, reverseCharge: e.target.value}))}>
+              <option value="N">N — No</option>
+              <option value="Y">Y — Yes</option>
+            </select>
+          </div>
+          <div>
+            <label style={S.label}>INVOICE COPY TYPE</label>
+            <select style={S.select} value={meta.copyType} onChange={e => setMeta(m => ({...m, copyType: e.target.value}))}>
+              {["Original","Duplicate","Triplicate"].map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label style={S.label}>PO / ORDER NO. <span style={{color:"#94A3B8",fontWeight:400}}>(optional)</span></label>
+            <input style={S.input} placeholder="PO-12345" value={meta.poNumber} onChange={e => setMeta(m => ({...m, poNumber: e.target.value}))} />
+          </div>
         </div>
       </div>
 
@@ -397,6 +654,39 @@ export default function App() {
         </div>
       </div>
 
+      {/* Shipped To */}
+      <div style={S.card}>
+        <p style={S.sectionTitle}>SHIP TO <span style={{color:"#94A3B8",fontWeight:400,fontSize:10}}>(optional — if different from Bill To)</span></p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={S.grid2}>
+            <div>
+              <label style={S.label}>NAME</label>
+              <input style={S.input} placeholder="Same as Bill To" value={client.shipName} onChange={e => setClient(c => ({...c, shipName: e.target.value}))} />
+            </div>
+            <div>
+              <label style={S.label}>CITY</label>
+              <input style={S.input} placeholder="City" value={client.shipCity} onChange={e => setClient(c => ({...c, shipCity: e.target.value}))} />
+            </div>
+          </div>
+          <div>
+            <label style={S.label}>ADDRESS</label>
+            <input style={S.input} placeholder="Delivery address" value={client.shipAddress} onChange={e => setClient(c => ({...c, shipAddress: e.target.value}))} />
+          </div>
+          <div style={S.grid2}>
+            <div>
+              <label style={S.label}>STATE</label>
+              <select style={S.select} value={client.shipState} onChange={e => setClient(c => ({...c, shipState: e.target.value}))}>
+                {STATES.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={S.label}>PIN</label>
+              <input style={S.input} placeholder="400001" value={client.shipPin} onChange={e => setClient(c => ({...c, shipPin: e.target.value}))} />
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Items */}
       <div style={S.card}>
         <p style={S.sectionTitle}>Items / Services</p>
@@ -412,15 +702,40 @@ export default function App() {
                 <label style={S.label}>DESCRIPTION *</label>
                 <input style={S.input} placeholder="Product / Service name" value={item.desc} onChange={e => updateItem(item.id, "desc", e.target.value)} />
               </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={S.label}>SIZE / SPECIFICATION <span style={{color:"#94A3B8",fontWeight:400}}>(optional)</span></label>
+                <input style={S.input} placeholder="e.g. 15.6X47.4, 8x4 ft, 2mm thick" value={item.size} onChange={e => updateItem(item.id, "size", e.target.value)} />
+              </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
                 <div>
-                  <label style={S.label}>HSN/SAC CODE</label>
-                  <input style={S.input} placeholder="1234" value={item.hsn} onChange={e => updateItem(item.id, "hsn", e.target.value)} />
+                  <label style={S.label}>HSN/SAC CODE <span style={{color:"#94A3B8",fontWeight:400}}>(optional)</span></label>
+                  <input style={S.input} placeholder="e.g. 7213" value={item.hsn}
+                    onChange={e => {
+                      const code = e.target.value.replace(/\D/g,"");
+                      const found = lookupHSN(code);
+                      updateItem(item.id, "hsn", code);
+                      if (found) updateItem(item.id, "gst", found.gst);
+                    }}
+                  />
+                  {item.hsn && (() => {
+                    const found = lookupHSN(item.hsn);
+                    if (found) return (
+                      <div style={{ fontSize: 11, marginTop: 4, color: "#059669", fontWeight: 600 }}>
+                        ✅ {found.desc} — GST {found.gst}% auto-set
+                      </div>
+                    );
+                    if (item.hsn.length >= 4) return (
+                      <div style={{ fontSize: 11, marginTop: 4, color: "#D97706" }}>
+                        ⚠️ HSN not found — manually select GST rate
+                      </div>
+                    );
+                    return null;
+                  })()}
                 </div>
                 <div>
                   <label style={S.label}>UNIT</label>
                   <select style={S.select} value={item.unit} onChange={e => updateItem(item.id, "unit", e.target.value)}>
-                    {["Nos","Kg","Ltr","Mtr","Box","Set","Pair","Hrs","Days","Pcs"].map(u => <option key={u}>{u}</option>)}
+                    {UNITS.map(u => <option key={u}>{u}</option>)}
                   </select>
                 </div>
                 <div>
@@ -430,6 +745,10 @@ export default function App() {
                 <div>
                   <label style={S.label}>RATE (₹) *</label>
                   <input type="number" style={S.input} placeholder="1000" value={item.rate} onChange={e => updateItem(item.id, "rate", e.target.value)} />
+                </div>
+                <div>
+                  <label style={S.label}>DISCOUNT % <span style={{color:"#94A3B8",fontWeight:400}}>(optional)</span></label>
+                  <input type="number" style={S.input} placeholder="0" value={item.discount} onChange={e => updateItem(item.id, "discount", e.target.value)} />
                 </div>
                 <div>
                   <label style={S.label}>GST RATE</label>
@@ -453,7 +772,9 @@ export default function App() {
         <p style={S.sectionTitle}>Summary</p>
         <div style={{ background: "#F8FAFC", borderRadius: 10, padding: 16, border: "1px solid #E2E8F0" }}>
           {[
-            { label: "Subtotal", value: "₹" + fmt(subtotal) },
+            { label: "Gross Total", value: "₹" + fmt(computed.reduce((s,c)=>s+c.base,0)) },
+            ...(totalDiscount > 0 ? [{ label: "Discount", value: "- ₹" + fmt(totalDiscount), color: "#DC2626" }] : []),
+            { label: "Taxable Amount", value: "₹" + fmt(subtotal) },
             ...(isIGST
               ? [{ label: "IGST", value: "₹" + fmt(totalGST) }]
               : [{ label: "CGST", value: "₹" + fmt(totalGST/2) }, { label: "SGST", value: "₹" + fmt(totalGST/2) }]
@@ -461,7 +782,7 @@ export default function App() {
           ].map((r, i) => (
             <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #E2E8F0" }}>
               <span style={{ fontSize: 13, color: "#64748B" }}>{r.label}</span>
-              <span style={{ fontSize: 13, color: "#1E293B", fontWeight: 600 }}>{r.value}</span>
+              <span style={{ fontSize: 13, color: r.color || "#1E293B", fontWeight: 600 }}>{r.value}</span>
             </div>
           ))}
           <div style={{ display: "flex", justifyContent: "space-between", padding: "12px 0 4px" }}>
@@ -486,7 +807,7 @@ export default function App() {
       </div>
 
       <div style={{ display: "flex", gap: 10 }}>
-        <button style={{ ...S.btn("#10B981"), flex: 1, padding: "14px 20px", fontSize: 14 }} onClick={() => { if (!client.name) { alert("Client ka naam daalo!"); return; } if (items.some(i => !i.desc || !i.qty || !i.rate)) { alert("Saare items complete karo!"); return; } setShowPreview(true); }}>
+        <button style={{ ...S.btn("#059669"), flex: 1, padding: "14px 20px", fontSize: 14 }} onClick={() => { if (!client.name) { alert("Client ka naam daalo!"); return; } if (items.some(i => !i.desc || !i.qty || !i.rate)) { alert("Saare items complete karo!"); return; } setShowPreview(true); }}>
           👁️ Preview Invoice
         </button>
       </div>
@@ -495,9 +816,10 @@ export default function App() {
       {showPreview && (
         <div style={{ position: "fixed", inset: 0, background: "#000000CC", zIndex: 200, overflowY: "auto", padding: 16 }}>
           <div style={{ maxWidth: 700, margin: "0 auto" }}>
-            <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
-              <button style={S.btn("#3B82F6")} onClick={handlePrint}>🖨️ Print / Save PDF</button>
-              <button style={{ ...S.btn("#10B981") }} onClick={() => { saveInvoice(); setShowPreview(false); }}>💾 Save Invoice</button>
+            <div style={{ display: "flex", gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
+              <button style={S.btn("#2563EB")} onClick={handlePrint}>🖨️ Print / Save PDF</button>
+              <button style={S.btn("#059669")} onClick={() => { saveInvoice(); setShowPreview(false); }}>💾 Save Invoice</button>
+              <button style={S.btn("#25D366")} onClick={() => { const msg = `GST Invoice ${meta.invoiceNo}\nClient: ${client.name}\nAmount: ₹${fmt(grandTotal)}\nDate: ${meta.date}`; window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`); }}>📱 WhatsApp Share</button>
               <button style={S.btnOutline} onClick={() => setShowPreview(false)}>✕ Close</button>
             </div>
             {renderInvoicePrint({ meta, client, items, biz, grandTotal, subtotal, totalGST, isIGST, computed })}
