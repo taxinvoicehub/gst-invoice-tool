@@ -132,7 +132,6 @@ const HSN_DB = {
   "2402": { gst: 28, desc: "Cigars/cigarettes/tobacco" },
   "2403": { gst: 28, desc: "Tobacco products" },
   "2523": { gst: 28, desc: "Portland cement/clinker" },
-  "2523": { gst: 28, desc: "Portland cement" },
   "3303": { gst: 28, desc: "Perfumes/toilet waters" },
   "3304": { gst: 28, desc: "Beauty/makeup preparations" },
   "3305": { gst: 28, desc: "Hair preparations/shampoo" },
