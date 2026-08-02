@@ -1,13 +1,13 @@
-gst invoice toolimport { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ref, onValue, set } from "firebase/database";
 import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { db, auth, googleProvider } from "./firebase";
 
-// ── helpers
+// ── helpers ──────────────────────────────────────────────
 const GST_RATES = [0, 5, 12, 18, 28];
 
 // HSN Code → { gst, desc } database (common items)
-const HSN_DB = {<img src="/logo.png" alt="Vinvoices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />
+const HSN_DB = {
   // 0% - Essentials
   "0101": { gst: 0, desc: "Live horses/asses/mules" },
   "0201": { gst: 0, desc: "Fresh/chilled meat" },
@@ -256,7 +256,8 @@ export default function App() {
     app: { minHeight: "100vh", background: "#F1F5F9", color: "#1E293B", fontFamily: "'Inter', 'Segoe UI', sans-serif", paddingBottom: 80 },
     header: { background: "#0F172A", borderBottom: "1px solid #1E293B", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 4px rgba(0,0,0,0.15)" },
     logo: { display: "flex", alignItems: "center", gap: 10 },
-    logoBox: { width: 36, height: 36, borderRadius: 8, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color: "#fff" },
+    logoBox: { width: 36, height: 36, borderRadius: 8, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color: "#fff", overflow: "hidden" },
+    logoImg: { width: "100%", height: "100%", objectFit: "cover" },
     logoText: { fontSize: 17, fontWeight: 700, color: "#fff" },
     nav: { display: "flex", gap: 4, background: "#1E293B", borderRadius: 10, padding: 4, border: "none", overflowX: "auto" },
     navBtn: (active) => ({ padding: "7px 14px", borderRadius: 7, fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer", transition: "all 0.2s", whiteSpace: "nowrap", background: active ? "#2563EB" : "transparent", color: active ? "#fff" : "#94A3B8", boxShadow: "none", fontFamily: "inherit" }),
@@ -490,8 +491,11 @@ export default function App() {
 
         {/* Footer */}
         <div style={{ background: "#1E3A5F", padding: "8px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ color: "#93C5FD", fontSize: 10 }}>This is a computer generated invoice</div>
-          <div style={{ color: "#93C5FD", fontSize: 10, opacity: 0.7 }}>GST Invoice Tool</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <img src="/logo.png" alt="Vinvoices" style={{ width: 16, height: 16, borderRadius: 3, objectFit: "cover" }} />
+            <div style={{ color: "#93C5FD", fontSize: 10 }}>This is a computer generated invoice</div>
+          </div>
+          <div style={{ color: "#93C5FD", fontSize: 10, opacity: 0.7 }}>Vinvoices — GST Invoice Tool</div>
         </div>
       </div>
     );
@@ -954,7 +958,9 @@ export default function App() {
   if (authLoading) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F1F5F9" }}>
       <div style={{ textAlign: "center" }}>
-        <div style={{ width: 48, height: 48, borderRadius: 12, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", margin: "0 auto 16px" }}>₹</div>
+        <div style={{ width: 48, height: 48, borderRadius: 12, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", margin: "0 auto 16px", overflow: "hidden" }}>
+          <img src="/logo.png" alt="Vinvoices" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
         <p style={{ color: "#64748B", fontSize: 14 }}>Loading...</p>
       </div>
     </div>
@@ -964,8 +970,10 @@ export default function App() {
   if (!user) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F1F5F9", padding: 20 }}>
       <div style={{ background: "#fff", borderRadius: 16, padding: 40, maxWidth: 380, width: "100%", textAlign: "center", boxShadow: "0 4px 24px rgba(15,23,42,0.08)", border: "1px solid #E2E8F0" }}>
-        <div style={{ width: 56, height: 56, borderRadius: 14, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 700, color: "#fff", margin: "0 auto 20px" }}>₹</div>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", marginBottom: 8 }}>GST Invoice Tool</h1>
+        <div style={{ width: 56, height: 56, borderRadius: 14, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 700, color: "#fff", margin: "0 auto 20px", overflow: "hidden" }}>
+          <img src="/logo.png" alt="Vinvoices" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        </div>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", marginBottom: 8 }}>Vinvoices</h1>
         <p style={{ fontSize: 13, color: "#64748B", marginBottom: 8 }}>Professional GST invoicing for Indian businesses</p>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 28, flexWrap: "wrap" }}>
           {["✅ Free to use", "🔒 Secure", "📱 Mobile friendly"].map(t => (
@@ -1018,10 +1026,12 @@ export default function App() {
       {/* Header */}
       <div style={S.header} className="app-header">
         <div style={S.logo}>
-          `````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````<img src="/logo.png" alt="Vinvoices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />oices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />oices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />oices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />oices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />oices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />oices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />oices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />oices" style={{ width: 36, height: 36, borderRadius: 8, objectFit: "contain", background: "#fff", padding: 2 }} onError={e => e.target.style.display="none"} />`````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````````
+          <div style={S.logoBox}>
+            <img src="/logo.png" alt="Vinvoices" style={S.logoImg} />
+          </div>
           <div>
             <div style={S.logoText}>Vinvoices</div>
-            <div style={{ fontSize: 9, color: "#64748B", fontFamily: "inherit", letterSpacing: 1.5 }} className="app-subtitle">PROFESSIONAL TOOL</div>
+            <div style={{ fontSize: 9, color: "#64748B", fontFamily: "inherit", letterSpacing: 1.5 }} className="app-subtitle">GST INVOICE TOOL</div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
