@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { ref, onValue, set } from "firebase/database";
 import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { db, auth, googleProvider } from "./firebase";
+import logo from "./logo.png";
 
 // ── helpers ──────────────────────────────────────────────
 const GST_RATES = [0, 5, 12, 18, 28];
@@ -492,7 +493,7 @@ export default function App() {
         {/* Footer */}
         <div style={{ background: "#1E3A5F", padding: "8px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <img src="/logo.png" alt="Vinvoices" style={{ width: 16, height: 16, borderRadius: 3, objectFit: "cover" }} />
+            <img src={logo} alt="Vinvoices" style={{ width: 16, height: 16, borderRadius: 3, objectFit: "cover" }} />
             <div style={{ color: "#93C5FD", fontSize: 10 }}>This is a computer generated invoice</div>
           </div>
           <div style={{ color: "#93C5FD", fontSize: 10, opacity: 0.7 }}>Vinvoices — GST Invoice Tool</div>
@@ -959,7 +960,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F1F5F9" }}>
       <div style={{ textAlign: "center" }}>
         <div style={{ width: 48, height: 48, borderRadius: 12, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 700, color: "#fff", margin: "0 auto 16px", overflow: "hidden" }}>
-          <img src="/logo.png" alt="Vinvoices" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={logo} alt="Vinvoices" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         </div>
         <p style={{ color: "#64748B", fontSize: 14 }}>Loading...</p>
       </div>
@@ -971,7 +972,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F1F5F9", padding: 20 }}>
       <div style={{ background: "#fff", borderRadius: 16, padding: 40, maxWidth: 380, width: "100%", textAlign: "center", boxShadow: "0 4px 24px rgba(15,23,42,0.08)", border: "1px solid #E2E8F0" }}>
         <div style={{ width: 56, height: 56, borderRadius: 14, background: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, fontWeight: 700, color: "#fff", margin: "0 auto 20px", overflow: "hidden" }}>
-          <img src="/logo.png" alt="Vinvoices" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          <img src={logo} alt="Vinvoices" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", marginBottom: 8 }}>Vinvoices</h1>
         <p style={{ fontSize: 13, color: "#64748B", marginBottom: 8 }}>Professional GST invoicing for Indian businesses</p>
@@ -1027,7 +1028,7 @@ export default function App() {
       <div style={S.header} className="app-header">
         <div style={S.logo}>
           <div style={S.logoBox}>
-            <img src="/logo.png" alt="Vinvoices" style={S.logoImg} />
+            <img src={logo} alt="Vinvoices" style={S.logoImg} />
           </div>
           <div>
             <div style={S.logoText}>Vinvoices</div>
